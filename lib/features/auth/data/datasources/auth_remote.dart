@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:dirassati/core/shared_constants.dart';
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 
@@ -10,7 +11,7 @@ class AuthRemoteDataSource {
   Future<UserModel> login(String email, String password) async {
     debugPrint("$email $password");
     final response = await dio.post(
-      'http://192.168.1.8:5080/api/parent/auth/login',
+      'http://$backendProviderIp/api/parent/auth/login',
       data: {
         'email': email,
         'password': password,

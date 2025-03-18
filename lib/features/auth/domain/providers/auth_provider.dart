@@ -41,39 +41,14 @@ class AuthStateNotifier extends StateNotifier<UserModel?> {
     await _secureStorage.delete(key: 'auth_token');
     state = null;
   }
+  // New debug login method for bypassing actual API call.
+  Future<void> debugLogin() async {
+    const dummyToken = "debug_dummy_token";
+    // Write the dummy token to secure storage.
+    await _secureStorage.write(key: 'auth_token', value: dummyToken);
+    // Set a static user. Adjust these values as needed.
+    state = UserModel(token: dummyToken, firstName: "Debug", lastName: "User");
+  }
 }
 
 
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import '../../../../core/storage/secure_storage.dart';
-// import '../../data/models/user_model.dart';
-// import '../../data/repositories/auth_repo_impl.dart';
-// import '../../../../core/services/auth_service.dart';
-
-// final authServiceProvider = Provider((ref) => AuthService());
-// final authRepositoryProvider = Provider((ref) => AuthRepository(ref.read(authServiceProvider)));
-// final secureStorageProvider = Provider((ref) => SecureStorage());
-
-// final authStateProvider = StateNotifierProvider<AuthStateNotifier, UserModel?>((ref) {
-//   return AuthStateNotifier(ref.read(authRepositoryProvider), ref.read(secureStorageProvider));
-// });
-
-// class AuthStateNotifier extends StateNotifier<UserModel?> {
-//   final AuthRepository _authRepository;
-//   final SecureStorage _secureStorage;
-
-//   AuthStateNotifier(this._authRepository, this._secureStorage) : super(null);
-
-//   Future<void> login(String email, String password) async {
-//     final user = await _authRepository.login(email, password);
-//     if (user != null) {
-//       await _secureStorage.saveToken(user.token);
-//       state = user;
-//     }
-//   }
-
-//   Future<void> logout() async {
-//     await _secureStorage.deleteToken();
-//     state = null;
-//   }
-// }

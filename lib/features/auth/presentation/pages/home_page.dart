@@ -1,7 +1,7 @@
 import 'package:dirassati/features/acceuil/presentation/pages/acceuil_page.dart';
-import 'package:dirassati/features/onboarding/presentation/widgets/compte_page.dart';
-import 'package:dirassati/features/onboarding/presentation/widgets/navbar.dart';
-import 'package:dirassati/features/onboarding/presentation/widgets/notifications_page.dart';
+import 'package:dirassati/features/profile/presentation/pages/compte_page.dart';
+import 'package:dirassati/core/widgets/navbar.dart';
+import 'package:dirassati/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/providers/auth_provider.dart';

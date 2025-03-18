@@ -71,6 +71,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     }
                   },
                 ),
+                // Debug Login Button for testing:
+                ElevatedButton(
+                  onPressed: () async {
+                    
+                      await authNotifier.debugLogin();
+                      // If debug login succeeds, proceed (e.g., navigate to Home).
+                  },
+                    child:Text("Debug Login")
+                ),
+
                 const SizedBox(height: 100),
               ],
             ),
