@@ -19,14 +19,14 @@ class BackgroundShapes extends StatelessWidget {
           ),
         ),
         Positioned(
-            top: 45 * screenHeight / 917,
+            top: 60 * screenHeight / 917,
             left: 0,
             right: 0,
             child: const Center(
               child: Text(
                 'LOGO',
                 style: TextStyle(
-                  fontSize: 30,
+                  fontSize: 20,
                   fontFamily: "Poppins",
                   fontWeight: FontWeight.w600,
                 ),

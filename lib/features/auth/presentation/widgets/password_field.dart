@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dirassati/features/auth/presentation/widgets/label_text_style.dart';
+import 'package:flutter_svg/svg.dart';
 
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
@@ -15,22 +16,24 @@ class _PasswordFieldState extends State<PasswordField> {
 
   @override
   Widget build(BuildContext context) {
+    final inputGrey = Color(0xFF8A8A8A);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Mot de passe',
-            style: TextStyle(fontSize: 16, fontFamily: "Poppins")),
-        const SizedBox(height: 10),
+            style: TextStyle(
+              fontSize: 14,
+            )),
         SizedBox(
           height: 45,
           child: TextField(
+            autofillHints: const [AutofillHints.password],
+            controller: widget.controller,
             enableSuggestions: false,
             enableInteractiveSelection: true,
-            readOnly: false, 
-            controller: widget.controller,
             obscureText: isObscured,
             obscuringCharacter: "*",
-            autofillHints: const [AutofillHints.password],
+            readOnly: false,
             decoration: InputDecoration(
               contentPadding: EdgeInsets.zero,
               suffixIcon: IconButton(
@@ -38,19 +41,30 @@ class _PasswordFieldState extends State<PasswordField> {
                     isObscured
                         ? Icons.visibility_off_outlined
                         : Icons.visibility_outlined,
-                    color: Colors.grey),
+                    color: inputGrey),
                 onPressed: () => setState(() => isObscured = !isObscured),
               ),
-              prefixIcon: const Icon(Icons.lock_outlined, color: Colors.grey),
+              prefixIcon: Container(
+                width: 24,
+                height: 24,
+                alignment: Alignment.center,
+                child: SvgPicture.asset(
+                  "assets/img/lockdotted.svg",
+                  width: 20,
+                  fit: BoxFit.contain,
+                  color: inputGrey,
+                ),
+              ),
+
               labelText: "************",
               labelStyle: labelTextStyle,
               floatingLabelBehavior: FloatingLabelBehavior.never,
               border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(7)),
               ),
-              enabledBorder: const OutlineInputBorder(
+              enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(7)),
-                borderSide: BorderSide(color: Colors.grey),
+                borderSide: BorderSide(color: inputGrey),
               ),
               // focusedBorder: const OutlineInputBorder(
               //   borderRadius: BorderRadius.all(Radius.circular(7)),

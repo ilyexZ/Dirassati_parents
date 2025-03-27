@@ -16,19 +16,23 @@ class StudentDetailsPage extends StatelessWidget {
       body: SafeArea(
         child: BackgroundShapesToponly(
           child2: Column(
-            children: [ Text(
+            children: [
+              Text(
                 "LOGO",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  fontFamily: "Poppins"
                 ),
               ),
-              CircleAvatar(
-                radius: 50,
-                // backgroundImage: NetworkImage(student.imageUrl),
-                backgroundImage: NetworkImage(
-                    "https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250"),
+              // Wrap the profile image in a Hero widget using the same tag as StudentCard.
+              Hero(
+                tag: 'student-${student.studentId}',
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: NetworkImage(
+                    "https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250",
+                  ),
+                ),
               ),
             ],
           ),
@@ -36,19 +40,11 @@ class StudentDetailsPage extends StatelessWidget {
             children: [
               Expanded(
                 child: SingleChildScrollView(
-                  
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5,),
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: Column(
                     children: [
                       ProfileHeaderWidget(student: student),
-
-                      // 2) Profile Header
-
-                      // 3) Informations Générales
                       InformationsGeneralesWidget(student: student),
-
-                      // 4) Activités
                       ActivitesWidget(),
                     ],
                   ),

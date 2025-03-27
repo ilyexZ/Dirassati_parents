@@ -6,11 +6,11 @@ class OnboardingInstructions extends StatelessWidget {
   final Function(int) onPageChanged;
 
   const OnboardingInstructions({
-    Key? key,
+    super.key,
     required this.instructions,
     required this.controller,
     required this.onPageChanged,
-  }) : super(key: key);
+  }) ;
 
   @override
   Widget build(BuildContext context) {

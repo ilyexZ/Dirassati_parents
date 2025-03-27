@@ -8,10 +8,10 @@ class ForgotPassword extends StatelessWidget {
     return Align(
       alignment: Alignment.topRight,
       child: GestureDetector(
-        onTap: () => print("forgotPassword UseCase!"),
+        onTap: () => debugPrint("forgotPassword UseCase!"),
         child: const Text(
           "Mot de passe oublié?",
-          style: TextStyle(fontFamily: "Poppins", fontSize: 14, fontWeight: FontWeight.w500),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500,letterSpacing: 0.3),
         ),
       ),
     );

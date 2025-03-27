@@ -24,7 +24,6 @@ class AuthRemoteDataSource {
       if (data.containsKey('token') &&
           data.containsKey('firstName') &&
           data.containsKey('lastName')) {
-            print(data);
         return UserModel.fromJson(data);
       } else {
         
@@ -35,37 +34,20 @@ class AuthRemoteDataSource {
       throw Exception("Login failed");
     }
   }
+  // New method for changing password.
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    const endpoint = "http://$backendProviderIp/api/parent/"; // Replace with your endpoint
+    final response = await dio.post(endpoint, data: {
+      "current_password": currentPassword,
+      "new_password": newPassword,
+    });
+    if (response.statusCode != 200) {
+      // You might want to inspect response.data for more error details.
+      throw Exception("Password change failed");
+    }
+  }
+  
 }
 
 
-// class AuthRemoteDataSource {
-//   final Dio dio;
 
-//   AuthRemoteDataSource(this.dio);
-
-//   Future<UserModel> login(String email, String password) async {
-// //     // For local testing: simulate a correct and incorrect login.
-// //     if (email == "test@example.com" && password == "password123") {
-// //       // Simulated correct login:
-// //       return UserModel(token: "dummy_token", email: email);
-// //     } else {
-// //       // Simulated wrong credentials:
-// //       throw Exception("Login failed: Invalid credentials");
-// //     }
-    
-//     // When ready to test with Docker, comment out the above code and use:
-    
-//     //'/api/parents' /api/parent/auth/login
-//     final response = await dio.post('http://localhost:5080/api/parent/auth/login', data: {
-//       'email': email,
-//       'password': password,
-//     });
-//     print("Response data: ${response.data}");
-//     if (response.statusCode == 200) {
-//       return UserModel.fromJson(response.data);
-//     } else {
-//       throw Exception("Login failed");
-//     }
-    
-//   }
-// }

@@ -7,24 +7,29 @@ class ProfileHeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: const Color(0xFF7B88F0).withOpacity(0.2),
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildRow(
-              "Nom:",
-              "${student.firstName} ${student.lastName}",
-            ),
-            _buildRow("Adresse:", "#ADDRESS#"),
-            _buildRow("Date de naissance:", "#BIRTHDATe#"),
-            _buildRow("Lieu de naissance:", "#BIRTHPLACE#"),
-          ],
-        ),
+    return Container(
+      margin: EdgeInsets.all(
+        8
+      ),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        border: Border.all(width: 0.1,color:Color(0xffEDEFFF) ),
+        borderRadius: BorderRadius.circular(10.0),
+      color: Color(0xffEDEFFF).withAlpha(230),
+        boxShadow: [
+        BoxShadow(blurRadius: 4,spreadRadius: 1,color: Colors.black.withOpacity(0.1))
+      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildRow(
+            "Nom:",
+            "${student.firstName} ${student.lastName}",
+          ),
+          _buildRow("Adresse:", "#ADDRESS#"),
+          _buildRow("Date de naissance:", "#BIRTHDATe#"),
+          _buildRow("Lieu de naissance:", "#BIRTHPLACE#"),
+        ],
       ),
     );
   }
@@ -40,7 +45,7 @@ class ProfileHeaderWidget extends StatelessWidget {
             child: Text(
               label,
               style: labelStyle ??
-                  const TextStyle(fontSize: 14, color: Color(0xFF777777)),
+                  const TextStyle(fontSize: 12, color: Color(0xFF777777)),
               softWrap: true,
             ),
           ),
@@ -50,7 +55,7 @@ class ProfileHeaderWidget extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.start,
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 12),
               softWrap: true,
             ),
           ),

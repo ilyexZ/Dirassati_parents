@@ -5,6 +5,8 @@ import '../../data/repositories/auth_repo_impl.dart'; // Use this version
 import '../../data/datasources/auth_remote.dart';
 import '../../data/datasources/auth_local.dart'; // if needed
 import 'package:dio/dio.dart';
+import '../../domain/usecases/change_password_usecase.dart';
+
 
 final dioProvider = Provider((ref) => Dio());
 final secureStorageProvider = Provider((ref) => const FlutterSecureStorage());
@@ -34,14 +36,14 @@ class AuthStateNotifier extends StateNotifier<UserModel?> {
     }
     await _secureStorage.write(key: 'auth_token', value: user.token);
     state = user;
-    print(user);
+
   }
 
   Future<void> logout() async {
     await _secureStorage.delete(key: 'auth_token');
     state = null;
   }
-  // New debug login method for bypassing actual API call.
+  
   Future<void> debugLogin() async {
     const dummyToken = "debug_dummy_token";
     // Write the dummy token to secure storage.
@@ -49,6 +51,11 @@ class AuthStateNotifier extends StateNotifier<UserModel?> {
     // Set a static user. Adjust these values as needed.
     state = UserModel(token: dummyToken, firstName: "Debug", lastName: "User");
   }
+
 }
+final changePasswordUseCaseProvider = Provider<ChangePasswordUseCase>((ref) {
+  final repository = ref.read(authRepositoryProvider);
+  return ChangePasswordUseCase(repository);
+});
 
 

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:dirassati/core/shared_constants.dart';
+import 'package:dirassati/features/acceuil/data/models/note_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../models/student_model.dart';
@@ -67,5 +68,20 @@ class StudentsRemoteDataSource {
       ),
       // Add more static students if needed.
     ];
+  }
+  // New method to fetch notes for a given category.
+  Future<List<Note>> fetchNotes(String category, String trimester) async {
+    // Replace with your actual endpoint.
+    const endpoint = "https://api.example.com/notes";
+    final response = await dio.get(endpoint, queryParameters: {
+      'category': category,
+      'trimester': trimester,
+    });
+    if (response.statusCode == 200) {
+      final List data = response.data as List;
+      return data.map((json) => Note.fromJson(json)).toList();
+    } else {
+      throw Exception("Failed to load notes");
+    }
   }
 }

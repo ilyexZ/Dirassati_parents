@@ -1,3 +1,4 @@
+import 'package:dirassati/core/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/background_shapes.dart';
@@ -30,59 +31,70 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final authNotifier = ref.read(authStateProvider.notifier);
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: BackgroundShapes(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: 35,
-                ),
-                EmailField(controller: emailController),
-                const SizedBox(height: 20),
-                PasswordField(controller: passwordController),
-                const SizedBox(height: 10),
-                const ForgotPassword(),
-                const SizedBox(height: 20),
-                LoginButton(
-                  onPressed: () async {
-                    try {
-                      FocusScope.of(context).unfocus();
-                      await authNotifier.login(
-                        emailController.text,
-                        passwordController.text,
-                      );
-                      // If login succeeds, proceed (e.g., navigate to Home).
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          behavior: SnackBarBehavior.floating,
-                          margin: const EdgeInsets.only(
-                              top: 20, left: 20, right: 20),
-                          content:
-                              const Text("Login failed: Invalid credentials"),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  },
-                ),
-                // Debug Login Button for testing:
-                ElevatedButton(
-                  onPressed: () async {
-                    
-                      await authNotifier.debugLogin();
-                      // If debug login succeeds, proceed (e.g., navigate to Home).
-                  },
-                    child:Text("Debug Login")
-                ),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: BackgroundShapes(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Authentifiez à vorte compte",
+                    style: TextStyle(color: Color(0xFF393939)),
+                  ),
+                  SizedBox(
+                    height: 35,
+                  ),
+                  EmailField(controller: emailController),
+                  const SizedBox(height: 20),
+                  PasswordField(controller: passwordController),
+                  const SizedBox(height: 5),
+                  const ForgotPassword(),
+                  const SizedBox(height: 40),
+                  LoginButton(
+                    onPressed: () async {
+                      try {
+                        FocusScope.of(context).unfocus();
+                        await authNotifier.login(
+                          emailController.text,
+                          passwordController.text,
+                        );
+                        // If login succeeds, proceed (e.g., navigate to Home).
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            margin: const EdgeInsets.only(
+                                top: 20, left: 20, right: 20),
+                            content:
+                                const Text("Login failed: Invalid credentials"),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  // Debug Login Button for testing:
+                  ElevatedButton(
+                      onPressed: () async {
+                        await authNotifier.debugLogin();
+                        // If debug login succeeds, proceed (e.g., navigate to Home).
+                      },
+                      child: Text("Debug Login")),
+                  ElevatedButton(
+                    onPressed: () {
+                      showStaticNotification();
+                    },
+                    child: const Text("Show Notification"),
+                  ),
 
-                const SizedBox(height: 100),
-              ],
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
           ),
         ),

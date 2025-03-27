@@ -7,19 +7,20 @@ class EmailField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     final inputGrey = Color(0xFF8A8A8A);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Adresse Email',
-            style: TextStyle(fontSize: 16, fontFamily: "Poppins")),
-        const SizedBox(height: 10),
+            style: TextStyle(fontSize: 14,)),
+        
         SizedBox(
           height: 50,
           child: TextField(
             controller: controller,
             decoration: InputDecoration(
               contentPadding: EdgeInsets.zero,
-              prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
+              prefixIcon:  Icon(Icons.email_outlined, color: inputGrey),
               labelText: "p.nom@esi-sba.dz",
               floatingLabelBehavior: FloatingLabelBehavior.never,
               labelStyle: labelTextStyle,

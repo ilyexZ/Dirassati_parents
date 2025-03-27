@@ -3,8 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import './core/services/shared_prefernces_service.dart';
 
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =FlutterLocalNotificationsPlugin();
 void main() async {
+  
   WidgetsFlutterBinding.ensureInitialized();
+
+// Android initialization
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  // iOS initialization (if needed)
+  const DarwinInitializationSettings initializationSettingsIOS =
+      DarwinInitializationSettings();
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsIOS,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   final sharedPrefsService = SharedPreferencesService();

@@ -11,48 +11,62 @@ class AcceuilPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final studentsAsyncValue = ref.watch(studentsProvider);
 
-    return SafeArea(
-      maintainBottomViewPadding: false,
-      child: Card(
-        clipBehavior: Clip.none,
-        elevation: 5,
-        color: Color(0xffEDEFFF),
-        margin: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-        //surfaceTintColor: Colors.white,
-
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color.fromARGB(255, 255, 255, 255),
-            border: Border(),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
+    return Scaffold(
+       appBar: AppBar(
+        backgroundColor: Color(0xFFEDEFFF),
+        surfaceTintColor: Colors.transparent,
+        title: Center(
+          child: const Text(
+            "LOGO",
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 30,
             ),
+            textAlign: TextAlign.center,
           ),
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20.0, top: 20.0),
-                  child: const Text(
-                    "Enfants",
-                    style: TextStyle(
-                        color: CupertinoColors.systemIndigo,
-                        fontFamily: "Poppins",
-                        fontSize: 24,
-                        fontWeight: FontWeight.w500,
-                        shadows: [
-                          Shadow(
-                            color: CupertinoColors.systemIndigo,
-                            blurRadius: 3,
-                            offset: Offset(1, 1)
-                          ),
-                        ]),
-                  ),
+        ),
+      ),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        margin: EdgeInsets.only(top: 8),
+        decoration: BoxDecoration(
+          boxShadow: [BoxShadow(blurRadius: 4,spreadRadius: 1,color: Colors.black.withOpacity(0.3))],
+          color: Colors.white,
+          border: Border(),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                
+                padding: const EdgeInsets.only(left: 20.0, top: 20.0,bottom: 10),
+                child: const Text(
+                  "Enfants",
+                  style: TextStyle(
+                      color: CupertinoColors.systemIndigo,
+                      fontFamily: "Poppins",
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
+                      shadows: [
+                        Shadow(
+                          color: CupertinoColors.systemIndigo,
+                          blurRadius: 3,
+                          offset: Offset(1, 1)
+                        ),
+                      ]),
                 ),
               ),
-              Expanded(
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: ()async {
+                  ref.invalidate(studentsProvider);
+                },
                 child: studentsAsyncValue.when(
                   data: (students) => ListView.builder(
                     addAutomaticKeepAlives: false,
@@ -68,8 +82,8 @@ class AcceuilPage extends ConsumerWidget {
                       Center(child: Text("Error: $error")),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

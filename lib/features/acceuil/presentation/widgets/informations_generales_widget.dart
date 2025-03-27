@@ -47,7 +47,8 @@ class InformationsGeneralesWidget extends StatelessWidget {
             flex: 1,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14,fontWeight: FontWeight.w500),
+              
               softWrap: true,
             ),
             
@@ -58,7 +59,7 @@ class InformationsGeneralesWidget extends StatelessWidget {
             child: Text(
               textAlign: TextAlign.start,
               value,
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14,color: Color(0xFF393939),fontWeight: FontWeight.w400),
               softWrap: true,
             ),
           ),

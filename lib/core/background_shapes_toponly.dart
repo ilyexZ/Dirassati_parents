@@ -61,7 +61,7 @@ class ShapesPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint1 = Paint()..color = shapeColor.withOpacity(0.2);
+    Paint paint1 = Paint()..color = shapeColor.withOpacity(0.1);
 
     // Scaling based on Figma's reference height
     //final scaleH = screenWidth / 412;

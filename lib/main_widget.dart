@@ -13,9 +13,12 @@ class MainWidget extends StatelessWidget {
         title: 'Dirassati',
         themeMode: ThemeMode.light,
         theme: ThemeData(
+          //brightness: Brightness.dark,
+          fontFamily: "Poppins",
           primarySwatch: Colors.blue,
           scaffoldBackgroundColor: Colors.white,
           useMaterial3: true,
+          applyElevationOverlayColor: false,
         ),
         darkTheme: ThemeData.dark(),
         debugShowCheckedModeBanner: false,
