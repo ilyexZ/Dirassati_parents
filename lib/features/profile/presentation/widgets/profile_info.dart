@@ -1,8 +1,10 @@
 // profile_info.dart
+import 'package:dirassati/features/profile/domain/entity/profile.dart';
 import 'package:flutter/material.dart';
 
 class ProfileInfo extends StatelessWidget {
-  const ProfileInfo({Key? key}) : super(key: key);
+  final Profile profile;
+  const ProfileInfo({super.key,required this.profile}) ;
 
   @override
   Widget build(BuildContext context) {
@@ -37,19 +39,19 @@ class ProfileInfo extends StatelessWidget {
           const SizedBox(height: 4),
 
           // Info rows
-          _buildInfoRow("Adresse", "742 evergreen terrace ,springfield",
+          _buildInfoRow("Adresse", "===NOT FOUND===",
               labelStyle, valueStyle),
           const SizedBox(height: 4),
-          _buildInfoRow("Date de naissance", "25 janvier 2000",
+          _buildInfoRow("Date de naissance", profile.birthDate,
               labelStyle, valueStyle),
           const SizedBox(height: 4),
-          _buildInfoRow("Lieu de naissance", "Springfield , USA",
+          _buildInfoRow("Lieu de naissance", "===NOT FOUND===",
               labelStyle, valueStyle),
           const SizedBox(height: 4),
-          _buildInfoRow("Numero de refence", "2024-001144Az12",
+          _buildInfoRow("Numero de refence", profile.parentId,
               labelStyle, valueStyle),
           const SizedBox(height: 4),
-          _buildInfoRow("Emploi", "architecte",
+          _buildInfoRow("Emploi", profile.occupation,
               labelStyle, valueStyle),
         ],
       ),

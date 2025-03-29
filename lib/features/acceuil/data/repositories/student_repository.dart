@@ -6,7 +6,7 @@ class StudentsRepository {
 
   StudentsRepository(this.remoteDataSource);
 
-  Future<List<Student>> fetchStudents() async {
-    return await remoteDataSource.getStudents();
-  }
+  Future<List<Student>> fetchStudents(String parentId) async {
+  return await remoteDataSource.getStudents(parentId);
+}
 }

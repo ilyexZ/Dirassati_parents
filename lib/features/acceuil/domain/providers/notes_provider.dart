@@ -1,14 +1,12 @@
 // lib/features/acceuil/domain/providers/notes_provider.dart
+import 'package:dirassati/core/core_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../acceuil/data/datasources/students_remote_data_source.dart';
 import '../../../acceuil/data/models/note_model.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // We assume that dioProvider, secureStorageProvider, and studentsRemoteDataSourceProvider
 // are defined as in your existing students provider code.
-final dioProvider = Provider((ref) => Dio());
-final secureStorageProvider = Provider((ref) => const FlutterSecureStorage());
+
 
 final studentsRemoteDataSourceProvider = Provider<StudentsRemoteDataSource>((ref) {
   final dio = ref.watch(dioProvider);

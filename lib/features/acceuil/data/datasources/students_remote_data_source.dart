@@ -17,7 +17,9 @@ class StudentsRemoteDataSource {
     required this.storage,
   });
 
-  Future<List<Student>> getStudents() async {
+  Future<List<Student>> getStudents(String parentId) async {
+  // Use parentId in the API call
+  //final response = await dio.get("http://$backendProviderIp/api/parents/$parentId/students");
     // Read token from secure storage.
     final token = await storage.read(key: 'auth_token');
     if (token == null) {
@@ -57,6 +59,7 @@ class StudentsRemoteDataSource {
         enrollmentDate: "2025-01-01",
         grade: "1st Grade",
         isActive: true,
+        
       ),
       Student(
         studentId: "debug-2",

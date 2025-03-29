@@ -9,7 +9,7 @@ class InformationsGeneralesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -22,13 +22,13 @@ class InformationsGeneralesWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _buildRow("Année", student.grade),
+          _buildRow("Année", student.grade ?? "#empty#"),
           Divider(),
-          _buildRow("Classe", "##CLASSE_DATA##"),
+          _buildRow("Classe", student.classe ?? "##empty##"),
           Divider(),
           _buildRow("N° Ref", student.studentId),
           Divider(),
-          _buildRow("Filière", "#FILIERE_DATA##"),
+          _buildRow("Filière",student.grade ?? "#empty#" ),
         ],
       ),
     );

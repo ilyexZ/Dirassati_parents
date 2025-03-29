@@ -1,15 +1,15 @@
+import 'dart:developer';
+
+import 'package:dirassati/core/core_providers.dart';
+import 'package:dirassati/core/services/colorLog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // or your secure storage wrapper
 import '../../data/models/user_model.dart';
 import '../../data/repositories/auth_repo_impl.dart'; // Use this version
 import '../../data/datasources/auth_remote.dart';
 import '../../data/datasources/auth_local.dart'; // if needed
-import 'package:dio/dio.dart';
 import '../../domain/usecases/change_password_usecase.dart';
 
-
-final dioProvider = Provider((ref) => Dio());
-final secureStorageProvider = Provider((ref) => const FlutterSecureStorage());
 
 final authRemoteDataSourceProvider = Provider((ref) => AuthRemoteDataSource(ref.read(dioProvider)));
 final authLocalDataSourceProvider = Provider((ref) => AuthLocalDataSource(ref.read(secureStorageProvider)));
@@ -40,7 +40,9 @@ class AuthStateNotifier extends StateNotifier<UserModel?> {
   }
 
   Future<void> logout() async {
+    
     await _secureStorage.delete(key: 'auth_token');
+    clog('r', "Logged out");
     state = null;
   }
   
@@ -50,6 +52,7 @@ class AuthStateNotifier extends StateNotifier<UserModel?> {
     await _secureStorage.write(key: 'auth_token', value: dummyToken);
     // Set a static user. Adjust these values as needed.
     state = UserModel(token: dummyToken, firstName: "Debug", lastName: "User");
+    clog("r","DEBUGGG LOGIIIIIIN");
   }
 
 }

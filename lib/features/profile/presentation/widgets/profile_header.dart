@@ -1,8 +1,9 @@
-// profile_header.dart
+import 'package:dirassati/features/profile/domain/entity/profile.dart';
 import 'package:flutter/material.dart';
 
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key});
+  final Profile profile;
+  const ProfileHeader({super.key, required this.profile});
 
   @override
   Widget build(BuildContext context) {
@@ -23,25 +24,28 @@ class ProfileHeader extends StatelessWidget {
         children: [
           const CircleAvatar(
             radius: 30,
-            backgroundImage: NetworkImage(
-              "https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250",
-            ),
+            // You might later change this to load a user image from profile data.
+            backgroundImage: NetworkImage("https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250"),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
-                  "First name Last name",
-                  style: TextStyle(
+                  "${profile.firstName} ${profile.lastName}",
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF1E1E1E),
                     letterSpacing: -0.3,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
+                Text(
+                  profile.occupation,
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                ),
               ],
             ),
           ),

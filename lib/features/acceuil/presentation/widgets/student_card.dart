@@ -105,7 +105,7 @@ class StudentCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 const Divider(),
                 // Classe
-                _buildInfoRow("Classe", "Class1-A"),
+                _buildInfoRow("Classe",student.grade ?? "#empty#"),
                 // Reference
                 _buildInfoRow("Num Ref", student.studentId),
                 // Performance
