@@ -20,7 +20,7 @@ class ProfilePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profile"),
+        title: const Text("Profile",style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),),
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,

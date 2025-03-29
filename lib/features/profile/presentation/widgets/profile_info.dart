@@ -39,13 +39,13 @@ class ProfileInfo extends StatelessWidget {
           const SizedBox(height: 4),
 
           // Info rows
-          _buildInfoRow("Adresse", "===NOT FOUND===",
+          _buildInfoRow("Adresse", "Somewhere",
               labelStyle, valueStyle),
           const SizedBox(height: 4),
           _buildInfoRow("Date de naissance", profile.birthDate,
               labelStyle, valueStyle),
           const SizedBox(height: 4),
-          _buildInfoRow("Lieu de naissance", "===NOT FOUND===",
+          _buildInfoRow("Lieu de naissance", "Elsewhere",
               labelStyle, valueStyle),
           const SizedBox(height: 4),
           _buildInfoRow("Numero de refence", profile.parentId,

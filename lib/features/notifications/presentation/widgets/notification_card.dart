@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 class NotificationCard extends StatelessWidget {
   final Map<String, String> data;
 
-  const NotificationCard({super.key, required this.data}) ;
+  const NotificationCard({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
+      shape: RoundedRectangleBorder(
+        side: const BorderSide(color: Color(0xFFE1E3E8), width: 1.0),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      elevation: 1,
       surfaceTintColor: Colors.transparent,
       color: Colors.white,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -18,73 +22,56 @@ class NotificationCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Title & subtitle separated
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title
-                Text(
-                  data['title'] ?? '',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(width: 40),
-                // Subtitle
-                Text(
-                  data['subtitle'] ?? '',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w400,
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
-            ),
+            buildRow(data['title'] ?? '', data['subtitle'] ?? ""),
             const SizedBox(height: 4),
             // Child info
-            Text(
-              data['child'] ?? '',
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 12,
-              ),
-            ),
+            buildRow("Enfant concernée", data['child'] ?? ""),
+
             const SizedBox(height: 4),
             // Description
-            Text(
-              data['description'] ?? '',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
 
-              textAlign: TextAlign.center,
-            ),
+            buildRow(null, data['description'] ?? ""),
             const SizedBox(height: 8),
             const Divider(),
-            // Date row
-            Row(
-              children: [
-                const Text(
-                  softWrap: true,
-                  maxLines: 2,
-                  'Date de réception : ',
-                  style: TextStyle(
-                    
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                ),
-                Text(
-                  data['date'] ?? '',
-                  softWrap: true,
-                  maxLines: 2,
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
-                ),
-              ],
+            buildRow(
+              'Date de réception',
+              data['date'] ?? '',
             ),
+            // Date row
           ],
         ),
       ),
     );
   }
 }
+
+Widget buildRow(String? label, String data) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      if (label != null)
+        Expanded(
+            child: Text(
+          "$label:",
+          style: labelstyle,
+        )),
+      Expanded(
+          child: Text(
+        data,
+        style: datastyle,
+        softWrap: true,
+        maxLines: 2,
+      )),
+    ],
+  );
+}
+
+const TextStyle labelstyle = TextStyle(
+  fontWeight: FontWeight.w600,
+  fontSize: 11,
+);
+const datastyle = TextStyle(
+  fontSize: 10,
+  color: Colors.grey,
+  fontWeight: FontWeight.w400,
+);

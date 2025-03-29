@@ -45,6 +45,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       body: PageView(
         
+        
         controller: _pageController,
         onPageChanged: (index) => setState(() => currentIndex = index),
         children: const [

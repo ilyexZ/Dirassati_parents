@@ -143,9 +143,9 @@ class StudentCard extends StatelessWidget {
                       "Voir details",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
-                        fontFamily: "Poppins",
-                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     SizedBox(width: 10),
