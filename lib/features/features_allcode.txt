@@ -1,531 +1,4 @@
-==== ./core/core_providers.dart ====
-// core/providers/core_providers.dart
-import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-final dioProvider = Provider((ref) => Dio());
-final secureStorageProvider = Provider((ref) => const FlutterSecureStorage());
-
-==== ./core/auth_info_provider.dart ====
-// core/providers/auth_info_provider.dart
-import 'package:dirassati/core/services/colorLog.dart';
-import 'package:dirassati/features/acceuil/data/datasources/students_remote_data_source.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
-import '../core/core_providers.dart';
-
-final authInfoProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  final storage = ref.read(secureStorageProvider);
-  final token = await storage.read(key: 'auth_token');
-  if (token==StudentsRemoteDataSource.debugToken) return {'parentId':"debugparentID"};
-  if (token == null) throw Exception("No token found");
-  final decoded =JwtDecoder.decode(token);
-  clog('g','[DEBUG] Decoded token type: ${decoded.runtimeType}');
-  clog('g','[DEBUG] Decoded content: $decoded');
-  return decoded;
-});
-
- final parentIdProvider = FutureProvider<String>((ref) async {
-   final authInfo = await ref.watch(authInfoProvider.future);
-   return authInfo['parentId'] ?? '';
- });
-
-==== ./core/shared_constants.dart ====
-const String backendProviderIp = "192.168.1.8:5080";
-
-
-
-==== ./core/widgets/navbar.dart ====
-import 'package:flutter/material.dart';
-
-class Navbar extends StatefulWidget {
-  final Function(int) onIndexChanged;
-  final int currentIndex;
-
-  const Navbar({
-    super.key,
-    required this.onIndexChanged,
-    required this.currentIndex,
-  }) ;
-
-  @override
-  _NavbarState createState() => _NavbarState();
-}
-
-class _NavbarState extends State<Navbar> {
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        // If swiped left (negative velocity), go to the next item
-        if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
-          if (widget.currentIndex < 2) {
-            widget.onIndexChanged(widget.currentIndex + 1);
-          }
-        }
-        // If swiped right (positive velocity), go to the previous item
-        else if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
-          if (widget.currentIndex > 0) {
-            widget.onIndexChanged(widget.currentIndex - 1);
-          }
-        }
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, -3),
-            ),
-          ],
-        ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: MediaQuery.of(context).size.width,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                    context, 0, Icons.home, Icons.home_outlined, "Acceuil"),
-                _buildNavItem(context, 1, Icons.notifications,
-                    Icons.notifications_outlined, "Notifications"),
-                _buildNavItem(context, 2, Icons.account_circle,
-                    Icons.account_circle_outlined, "Profile"),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(BuildContext context, int index, IconData selectedIcon,
-      IconData unselectedIcon, String label) {
-    final bool isSelected = index == widget.currentIndex;
-
-    return GestureDetector(
-      onTap: () => widget.onIndexChanged(index),
-      child: SizedBox(
-        height: 65,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          padding: EdgeInsets.symmetric(
-            vertical: 10,
-            horizontal: isSelected ? 3 : 2,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? Colors.blue.withOpacity(0.1)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(25),
-            ),
-            height: 45,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                  isSelected ? selectedIcon : unselectedIcon,
-                  color: isSelected ? const Color(0xFF4D44B5) : Colors.black,
-                  size: 24,
-                ),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (child, animation) => SizeTransition(
-                    sizeFactor: animation,
-                    axis: Axis.horizontal,
-                    child: child,
-                  ),
-                  child: isSelected
-                      ? Center(
-                          key: ValueKey("label_$index"),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 4.0),
-                            child: Text(
-                              overflow: TextOverflow.ellipsis,
-                              label,
-                              style: const TextStyle(
-                                fontFamily: "Poppins",
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF4D44B5),
-                              ),
-                            ),
-                          ),
-                        )
-                      : Container(
-                          key: ValueKey("empty_$index"),
-                          width: 0,
-                        ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
-==== ./core/widgets/dot_indicator.dart ====
-import 'package:flutter/material.dart';
-
-class DotIndicator extends StatelessWidget {
-  final bool isActive;
-  
-  const DotIndicator({super.key, required this.isActive});
-  
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      height: 10,
-      width: isActive ? 20 : 10,
-      decoration: BoxDecoration(
-        color: isActive ? Colors.blue : Colors.grey,
-        borderRadius: BorderRadius.circular(5),
-      ),
-    );
-  }
-}
-
-
-==== ./core/widgets/background_shapes.dart ====
-import 'package:flutter/material.dart';
-
-class BackgroundShapes extends StatelessWidget {
-  final Widget child;
-
-  const BackgroundShapes({super.key, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: CustomPaint(
-            size: Size(screenWidth, screenHeight),
-            painter: ShapesPainter(screenWidth: screenWidth, screenHeight: screenHeight),
-          ),
-        ),
-        Positioned(
-            top: 60 * screenHeight / 917,
-            left: 0,
-            right: 0,
-            child: const Center(
-              child: Text(
-                'LOGO',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontFamily: "Poppins",
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        child,
-      ],
-    );
-  }
-}
-
-class ShapesPainter extends CustomPainter {
-  final double screenHeight;
-  final double screenWidth;
-
-  static Color shapeColor = Color(0xFF7B88F0);
-  ShapesPainter({required this.screenWidth, required this.screenHeight});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint paint1 = Paint()..color = shapeColor.withOpacity(0.5);
-    Paint paint2 = Paint()..color = shapeColor
-      ..style = PaintingStyle.stroke // Outline only
-      ..strokeWidth = 2; // Border thickness
-
-    // Scaling based on Figma's reference height
-    final scaleH = screenWidth / 412;
-    final scaleV = screenHeight / 917;
-
-    final double circle1diam = scaleV * 500;
-
-    // Top Ellipse
-    Rect ellipseRect = Rect.fromCenter(
-      center: Offset(screenWidth / 2, -140 * scaleV),
-      width: circle1diam,
-      height: circle1diam,
-    );
-    canvas.drawOval(ellipseRect, paint1);
-
-    // Bottom Right Ellipses
-    Rect ellipseRect2 = Rect.fromCenter(
-      center: Offset((261 + 366 / 2) * scaleH, (651 + 366 / 2) * scaleV),
-      width: 366 * scaleV,
-      height: 366 * scaleV,
-    );
-    canvas.drawOval(ellipseRect2, paint1);
-
-    Rect ellipseRect25 = Rect.fromCenter(
-      center: Offset((279 + 366 / 2) * scaleH, (651 + 366 / 2) * scaleV),
-      width: 366 * scaleV,
-      height: 366 * scaleV,
-    );
-    canvas.drawOval(ellipseRect25, paint2);
-
-    // Bottom Left Ellipse
-    Rect ellipseRect3 = Rect.fromCenter(
-      center: Offset((-44 + 366 / 2) * scaleH, (763 + 366 / 2) * scaleV),
-      width: 366 * scaleV,
-      height: 366 * scaleV,
-    );
-    canvas.drawOval(ellipseRect3, paint1);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-
-==== ./core/services/shared_prefernces_service.dart ====
-import 'package:shared_preferences/shared_preferences.dart';
-
-class SharedPreferencesService {
-  static const String _onboardingKey = "seenOnboarding";
-
-  // Static helper to get an instance of SharedPreferences.
-  static Future<SharedPreferences> getInstance() async {
-    return await SharedPreferences.getInstance();
-  }
-
-  Future<bool> getSeenOnboarding() async {
-    final prefs = await getInstance();
-    return prefs.getBool(_onboardingKey) ?? false;
-  }
-
-  Future<void> setSeenOnboarding(bool seen) async {
-    final prefs = await getInstance();
-    await prefs.setBool(_onboardingKey, seen);
-  }
-}
-
-
-==== ./core/services/colorLog.dart ====
-void clog(String c, String message) {
-  final colors = {
-    'r': '\x1B[31m', // Red
-    'g': '\x1B[32m', // Green
-    'y': '\x1B[33m', // Yellow
-    'b': '\x1B[34m', // Blue
-    'w': '\x1B[37m', // White
-    'd': '\x1B[1m',  // Bold
-    'x': '\x1B[0m',  // Reset
-  };
-
-  print('${colors[c] ?? colors['x']}$message\x1B[0m');
-}
-
-
-==== ./core/services/notification_service.dart ====
-import 'package:dirassati/main.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-Future<void> showStaticNotification() async {
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
-      AndroidNotificationDetails(
-    'your_channel_id', // channel id
-    'your_channel_name', // channel name
-    channelDescription: 'your_channel_description',
-    importance: Importance.max,
-    priority: Priority.high,
-  );
-
-  const NotificationDetails platformChannelSpecifics =
-      NotificationDetails(android: androidPlatformChannelSpecifics);
-
-  await flutterLocalNotificationsPlugin.show(
-    0, // notification id
-    'Hello', // title
-    'This is a static notification', // body
-    platformChannelSpecifics,
-    payload: 'Optional_Screen_Arguments',
-  );
-}
-
-
-==== ./core/storage/secure_storage.dart ====
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-class SecureStorage {
-  final _storage = const FlutterSecureStorage();
-
-  Future<void> saveToken(String token) async {
-    await _storage.write(key: "jwt", value: token);
-  }
-
-  Future<String?> getToken() async {
-    return await _storage.read(key: "jwt");
-  }
-
-  Future<void> deleteToken() async {
-    await _storage.delete(key: "jwt");
-  }
-}
-
-
-==== ./core/theme.dart ====
-import 'package:flutter/material.dart';
-
-class AppTheme {
-  static final lightTheme = ThemeData(
-    brightness: Brightness.light,
-    primaryColor: Colors.blueAccent,
-    scaffoldBackgroundColor: Colors.white,
-    textTheme: const TextTheme(
-      bodyLarge: TextStyle(fontSize: 18, fontFamily: "Poppins"),
-      bodyMedium: TextStyle(fontSize: 16, fontFamily: "Poppins"),
-      bodySmall: TextStyle(fontSize: 14, fontFamily: "Poppins"),
-    ),
-  );
-}
-
-
-==== ./core/background_shapes_toponly.dart ====
-import 'package:flutter/material.dart';
-
-class BackgroundShapesToponly extends StatelessWidget {
-  final Widget child1;
-  final Widget child2;
-
-  const BackgroundShapesToponly(
-      {super.key, required this.child1, required this.child2});
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: CustomPaint(
-            size: Size(screenWidth, screenHeight),
-            painter: ShapesPainter(
-                screenWidth: screenWidth, screenHeight: screenHeight),
-          ),
-        ),
-        Column(
-          children: [
-            Expanded(
-                flex: 2,
-                child: SizedBox(
-                  height: 20,
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: BackButton(
-                      style: ButtonStyle(
-                          backgroundColor:
-                              WidgetStatePropertyAll(Colors.white)),
-                    ),
-                  ),
-                )),
-            Expanded(
-              flex: 9,
-              child: child1,
-            ),
-          ],
-        ),
-        Positioned(
-          child: Center(
-            child: child2,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class ShapesPainter extends CustomPainter {
-  final double screenHeight;
-  final double screenWidth;
-
-  static Color shapeColor = Color(0xFF7B88F0);
-  ShapesPainter({required this.screenWidth, required this.screenHeight});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint paint1 = Paint()..color = shapeColor.withOpacity(0.1);
-
-    // Scaling based on Figma's reference height
-    //final scaleH = screenWidth / 412;
-    final scaleV = screenHeight / 917;
-
-    final double circle1diam = scaleV * 500;
-
-    // Top Ellipse
-    Rect ellipseRect = Rect.fromCenter(
-      center: Offset(screenWidth / 2, -140 * scaleV),
-      width: circle1diam,
-      height: circle1diam,
-    );
-    canvas.drawOval(ellipseRect, paint1);
-
-    // Bottom Right Ellipses
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-
-==== ./main_widget.dart ====
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'features/auth/presentation/pages/auth_wrapper.dart';
-import 'features/onboarding/presentation/pages/onboarding_page.dart';
-class MainWidget extends StatelessWidget {
-  final bool seenOnboarding;
-  const MainWidget({super.key, required this.seenOnboarding});
-
-  @override
-  Widget build(BuildContext context) {
-    return ProviderScope(
-      child: MaterialApp(
-        title: 'Dirassati',
-        themeMode: ThemeMode.light,
-        theme: ThemeData(
-          //brightness: Brightness.dark,
-          fontFamily: "Poppins",
-          primarySwatch: Colors.blue,
-          scaffoldBackgroundColor: Colors.white,
-          useMaterial3: true,
-          applyElevationOverlayColor: false,
-        ),
-        darkTheme: ThemeData.dark(),
-        debugShowCheckedModeBanner: false,
-        // Show onboarding page if it hasn't been seen; otherwise, show AuthWrapper.
-        home: seenOnboarding ? const AuthWrapper() : const OnboardingPage(),
-      ),
-    );
-  }
-}
-
-
-==== ./features/profile/domain/entity/profile.dart ====
+==== ./profile/domain/entity/profile.dart ====
 class Profile {
   final String parentId;
   final String occupation;
@@ -571,7 +44,7 @@ class Profile {
 }
 
 
-==== ./features/profile/domain/usecases/get_profile_usecase.dart ====
+==== ./profile/domain/usecases/get_profile_usecase.dart ====
 import 'package:dirassati/features/profile/data/datasources/repository/profile_repository.dart';
 import 'package:dirassati/features/profile/domain/entity/profile.dart';
 
@@ -586,7 +59,7 @@ class GetProfileUseCase {
 }
 
 
-==== ./features/profile/data/datasources/repository/profile_repository.dart ====
+==== ./profile/data/datasources/repository/profile_repository.dart ====
 import 'package:dirassati/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:dirassati/features/profile/domain/entity/profile.dart';
 
@@ -607,7 +80,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
 }
 
 
-==== ./features/profile/data/datasources/profile_remote_datasource.dart ====
+==== ./profile/data/datasources/profile_remote_datasource.dart ====
 import 'package:dio/dio.dart';
 import 'package:dirassati/core/auth_info_provider.dart';
 import 'package:dirassati/core/shared_constants.dart';
@@ -657,7 +130,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 }
 
 
-==== ./features/profile/presentation/widgets/profile_settings.dart ====
+==== ./profile/presentation/widgets/profile_settings.dart ====
 // profile_settings.dart
 import 'package:flutter/material.dart';
 import 'package:dirassati/features/profile/presentation/widgets/custom_list_tile.dart';
@@ -715,7 +188,7 @@ class ProfileSettings extends StatelessWidget {
 }
 
 
-==== ./features/profile/presentation/widgets/profile_header.dart ====
+==== ./profile/presentation/widgets/profile_header.dart ====
 import 'package:dirassati/features/profile/domain/entity/profile.dart';
 import 'package:flutter/material.dart';
 
@@ -774,7 +247,7 @@ class ProfileHeader extends StatelessWidget {
 }
 
 
-==== ./features/profile/presentation/widgets/profile_info.dart ====
+==== ./profile/presentation/widgets/profile_info.dart ====
 // profile_info.dart
 import 'package:dirassati/features/profile/domain/entity/profile.dart';
 import 'package:flutter/material.dart';
@@ -853,7 +326,7 @@ class ProfileInfo extends StatelessWidget {
 }
 
 
-==== ./features/profile/presentation/widgets/inline_error_box.dart ====
+==== ./profile/presentation/widgets/inline_error_box.dart ====
 // inline_error_box.dart
 import 'package:flutter/material.dart';
 
@@ -899,7 +372,7 @@ class InlineErrorBox extends StatelessWidget {
 }
 
 
-==== ./features/profile/presentation/widgets/password_form.dart ====
+==== ./profile/presentation/widgets/password_form.dart ====
 // lib/features/auth/presentation/widgets/password_form.dart
 import 'package:dirassati/features/auth/presentation/widgets/label_text_style.dart';
 import 'package:flutter/material.dart';
@@ -1063,7 +536,7 @@ class _PasswordFormWidgetState extends ConsumerState<PasswordFormWidget> {
 }
 
 
-==== ./features/profile/presentation/widgets/custom_list_tile.dart ====
+==== ./profile/presentation/widgets/custom_list_tile.dart ====
 // custom_list_tile.dart
 import 'package:flutter/material.dart';
 
@@ -1120,7 +593,7 @@ class CustomListTile extends StatelessWidget {
 }
 
 
-==== ./features/profile/presentation/pages/change_password_page.dart ====
+==== ./profile/presentation/pages/change_password_page.dart ====
 // change_password_page.dart
 import 'package:dirassati/features/profile/presentation/widgets/password_form.dart';
 import 'package:flutter/material.dart';
@@ -1168,7 +641,7 @@ class ChangePasswordPage extends StatelessWidget {
 }
 
 
-==== ./features/profile/presentation/pages/profile_page.dart ====
+==== ./profile/presentation/pages/profile_page.dart ====
 import 'package:dirassati/core/auth_info_provider.dart';
 import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dirassati/features/acceuil/domain/providers/students_provider.dart';
@@ -1261,7 +734,7 @@ class ProfilePage extends ConsumerWidget {
 }
 
 
-==== ./features/profile/presentation/providers/profile_providers.dart ====
+==== ./profile/presentation/providers/profile_providers.dart ====
 import 'package:dio/dio.dart';
 import 'package:dirassati/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:dirassati/features/profile/data/datasources/repository/profile_repository.dart';
@@ -1296,7 +769,7 @@ final profileProvider = FutureProvider<Profile>((ref) async {
 });
 
 
-==== ./features/notifications/presentation/widgets/static_data.dart ====
+==== ./notifications/presentation/widgets/static_data.dart ====
 const List<Map<String, String>> convocationsData = [
     {
       'title': 'Mr. LastName',
@@ -1360,7 +833,7 @@ const List<Map<String, String>> convocationsData = [
     },
   ];
 
-==== ./features/notifications/presentation/widgets/notification_list.dart ====
+==== ./notifications/presentation/widgets/notification_list.dart ====
 import 'package:flutter/material.dart';
 import 'notification_card.dart';
 
@@ -1385,7 +858,7 @@ class NotificationList extends StatelessWidget {
 }
 
 
-==== ./features/notifications/presentation/widgets/notification_card.dart ====
+==== ./notifications/presentation/widgets/notification_card.dart ====
 import 'package:flutter/material.dart';
 
 class NotificationCard extends StatelessWidget {
@@ -1465,7 +938,7 @@ const datastyle = TextStyle(
 );
 
 
-==== ./features/notifications/presentation/widgets/red_banner.dart ====
+==== ./notifications/presentation/widgets/red_banner.dart ====
 import 'package:flutter/material.dart';
 
 class RedBanner extends StatelessWidget {
@@ -1524,7 +997,7 @@ class RedBanner extends StatelessWidget {
 }
 
 
-==== ./features/notifications/presentation/pages/notifications_child.dart ====
+==== ./notifications/presentation/pages/notifications_child.dart ====
 import 'package:flutter/material.dart';
 
 class NotificationsChildPage extends StatefulWidget {
@@ -1736,7 +1209,7 @@ class _NotificationsPageState extends State<NotificationsChildPage>
 }
 
 
-==== ./features/notifications/presentation/pages/notifications_page.dart ====
+==== ./notifications/presentation/pages/notifications_page.dart ====
 import 'package:dirassati/features/notifications/presentation/widgets/notification_list.dart';
 import 'package:dirassati/features/notifications/presentation/widgets/red_banner.dart';
 import 'package:dirassati/features/notifications/presentation/widgets/static_data.dart';
@@ -1880,7 +1353,7 @@ class _NotificationsPageState extends State<NotificationsPage>
 }
 
 
-==== ./features/acceuil/domain/providers/notes_provider.dart ====
+==== ./acceuil/domain/providers/notes_provider.dart ====
 // lib/features/acceuil/domain/providers/notes_provider.dart
 import 'package:dirassati/core/core_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1907,7 +1380,7 @@ final notesProvider = FutureProvider.family<List<Note>, Map<String, String>>((re
 
 
 
-==== ./features/acceuil/domain/providers/students_provider.dart ====
+==== ./acceuil/domain/providers/students_provider.dart ====
 import 'package:dirassati/core/auth_info_provider.dart';
 import 'package:dirassati/core/core_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1943,7 +1416,7 @@ final studentsProvider = FutureProvider<List<Student>>((ref) async {
 // });
 
 
-==== ./features/acceuil/data/datasources/students_remote_data_source.dart ====
+==== ./acceuil/data/datasources/students_remote_data_source.dart ====
 import 'package:dio/dio.dart';
 import 'package:dirassati/core/shared_constants.dart';
 import 'package:dirassati/features/acceuil/data/models/note_model.dart';
@@ -2036,7 +1509,7 @@ class StudentsRemoteDataSource {
 }
 
 
-==== ./features/acceuil/data/models/student_model.dart ====
+==== ./acceuil/data/models/student_model.dart ====
 class Student {
   final String studentId;
   final String firstName;
@@ -2079,7 +1552,7 @@ class Student {
 }
 
 
-==== ./features/acceuil/data/models/note_model.dart ====
+==== ./acceuil/data/models/note_model.dart ====
 // lib/features/acceuil/data/models/note_model.dart
 class Note {
   final String title;
@@ -2102,7 +1575,7 @@ class Note {
 }
 
 
-==== ./features/acceuil/data/repositories/student_repository.dart ====
+==== ./acceuil/data/repositories/student_repository.dart ====
 import '../datasources/students_remote_data_source.dart';
 import '../models/student_model.dart';
 
@@ -2117,7 +1590,7 @@ class StudentsRepository {
 }
 
 
-==== ./features/acceuil/presentation/widgets/grade_item.dart ====
+==== ./acceuil/presentation/widgets/grade_item.dart ====
 import 'package:flutter/material.dart';
 
 class GradeItem extends StatelessWidget {
@@ -2191,7 +1664,7 @@ class GradeItem extends StatelessWidget {
 }
 
 
-==== ./features/acceuil/presentation/widgets/student_card.dart ====
+==== ./acceuil/presentation/widgets/student_card.dart ====
 // ... other imports
 import 'package:dirassati/features/acceuil/data/models/student_model.dart';
 import 'package:dirassati/features/acceuil/presentation/pages/student_details_page.dart';
@@ -2420,7 +1893,7 @@ class StudentCard extends StatelessWidget {
 }
 
 
-==== ./features/acceuil/presentation/widgets/activities_widget.dart ====
+==== ./acceuil/presentation/widgets/activities_widget.dart ====
 import 'package:dirassati/features/acceuil/presentation/pages/notes_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -2487,7 +1960,7 @@ class ActivitesWidget extends StatelessWidget {
 }
 
 
-==== ./features/acceuil/presentation/widgets/profile_header_widget.dart ====
+==== ./acceuil/presentation/widgets/profile_header_widget.dart ====
 import 'package:dirassati/features/acceuil/data/models/student_model.dart';
 import 'package:flutter/material.dart';
 
@@ -2560,7 +2033,7 @@ class ProfileHeaderWidget extends StatelessWidget {
 }
 
 
-==== ./features/acceuil/presentation/widgets/informations_generales_widget.dart ====
+==== ./acceuil/presentation/widgets/informations_generales_widget.dart ====
 import 'package:dirassati/features/acceuil/data/models/student_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -2633,7 +2106,7 @@ class InformationsGeneralesWidget extends StatelessWidget {
 }
 
 
-==== ./features/acceuil/presentation/widgets/notes_tab.dart ====
+==== ./acceuil/presentation/widgets/notes_tab.dart ====
 // lib/features/acceuil/presentation/widgets/notes_tab.dart
 import 'package:flutter/material.dart';
 import 'grade_item.dart';
@@ -2825,7 +2298,7 @@ class _NotesTabState extends ConsumerState<NotesTab> {
 
  */
 
-==== ./features/acceuil/presentation/pages/notes_page.dart ====
+==== ./acceuil/presentation/pages/notes_page.dart ====
 import 'package:dirassati/features/acceuil/presentation/widgets/notes_tab.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -2914,7 +2387,7 @@ class NotesPage extends StatelessWidget {
   }
 }
 
-==== ./features/acceuil/presentation/pages/acceuil_page.dart ====
+==== ./acceuil/presentation/pages/acceuil_page.dart ====
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -3008,7 +2481,7 @@ class AcceuilPage extends ConsumerWidget {
 }
 
 
-==== ./features/acceuil/presentation/pages/student_details_page.dart ====
+==== ./acceuil/presentation/pages/student_details_page.dart ====
 import 'package:dirassati/core/background_shapes_toponly.dart';
 import 'package:dirassati/features/acceuil/data/models/student_model.dart';
 import 'package:dirassati/features/acceuil/presentation/widgets/activities_widget.dart';
@@ -3070,7 +2543,7 @@ class StudentDetailsPage extends StatelessWidget {
 }
 
 
-==== ./features/onboarding/presentation/widgets/onboarding_button.dart ====
+==== ./onboarding/presentation/widgets/onboarding_button.dart ====
 import 'package:dirassati/core/services/shared_prefernces_service.dart';
 import 'package:flutter/material.dart';
 import 'package:dirassati/features/auth/presentation/pages/auth_wrapper.dart';
@@ -3131,7 +2604,7 @@ class OnboardingButton extends StatelessWidget {
   }
 }
 
-==== ./features/onboarding/presentation/widgets/onboarding_instructions.dart ====
+==== ./onboarding/presentation/widgets/onboarding_instructions.dart ====
 import 'package:flutter/material.dart';
 
 class OnboardingInstructions extends StatelessWidget {
@@ -3173,7 +2646,7 @@ class OnboardingInstructions extends StatelessWidget {
 }
 
 
-==== ./features/onboarding/presentation/widgets/onboarding_illustration.dart ====
+==== ./onboarding/presentation/widgets/onboarding_illustration.dart ====
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -3194,7 +2667,7 @@ class OnboardingIllustration extends StatelessWidget {
 }
 
 
-==== ./features/onboarding/presentation/widgets/onboarding_header.dart ====
+==== ./onboarding/presentation/widgets/onboarding_header.dart ====
 import 'package:flutter/material.dart';
 
 class OnboardingHeader extends StatelessWidget {
@@ -3232,7 +2705,7 @@ class OnboardingHeader extends StatelessWidget {
 }
 
 
-==== ./features/onboarding/presentation/widgets/onboarding_dots.dart ====
+==== ./onboarding/presentation/widgets/onboarding_dots.dart ====
 import 'package:flutter/material.dart';
 
 class OnboardingDots extends StatelessWidget {
@@ -3267,7 +2740,7 @@ class OnboardingDots extends StatelessWidget {
 }
 
 
-==== ./features/onboarding/presentation/pages/onboarding_page.dart ====
+==== ./onboarding/presentation/pages/onboarding_page.dart ====
 import 'package:flutter/material.dart';
 import 'package:dirassati/features/onboarding/presentation/widgets/onboarding_button.dart';
 import 'package:dirassati/features/onboarding/presentation/widgets/onboarding_header.dart';
@@ -3332,7 +2805,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 }
 
 
-==== ./features/auth/domain/usecases/change_password_usecase.dart ====
+==== ./auth/domain/usecases/change_password_usecase.dart ====
 // lib/features/auth/domain/usecases/change_password_usecase.dart
 import '../../data/repositories/auth_repo_impl.dart';
 
@@ -3354,7 +2827,7 @@ class ChangePasswordUseCase {
 }
 
 
-==== ./features/auth/domain/providers/auth_provider.dart ====
+==== ./auth/domain/providers/auth_provider.dart ====
 import 'dart:developer';
 
 import 'package:dirassati/core/core_providers.dart';
@@ -3421,7 +2894,7 @@ final changePasswordUseCaseProvider = Provider<ChangePasswordUseCase>((ref) {
 
 
 
-==== ./features/auth/data/datasources/auth_local.dart ====
+==== ./auth/data/datasources/auth_local.dart ====
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthLocalDataSource {
@@ -3443,7 +2916,7 @@ class AuthLocalDataSource {
 }
 
 
-==== ./features/auth/data/datasources/auth_remote.dart ====
+==== ./auth/data/datasources/auth_remote.dart ====
 import 'package:dio/dio.dart';
 import 'package:dirassati/core/shared_constants.dart';
 import 'package:flutter/material.dart';
@@ -3499,7 +2972,7 @@ class AuthRemoteDataSource {
 
 
 
-==== ./features/auth/data/models/user_model.dart ====
+==== ./auth/data/models/user_model.dart ====
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'user_model.g.dart';
@@ -3522,7 +2995,7 @@ class UserModel {
 }
 
 
-==== ./features/auth/data/models/user_model.g.dart ====
+==== ./auth/data/models/user_model.g.dart ====
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'user_model.dart';
@@ -3544,7 +3017,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
     };
 
 
-==== ./features/auth/data/repositories/auth_repo_impl.dart ====
+==== ./auth/data/repositories/auth_repo_impl.dart ====
 
 import 'package:dirassati/features/auth/data/datasources/auth_local.dart';
 import 'package:dirassati/features/auth/data/datasources/auth_remote.dart';
@@ -3589,7 +3062,7 @@ class AuthRepository {
 }
 
 
-==== ./features/auth/presentation/widgets/login_button.dart ====
+==== ./auth/presentation/widgets/login_button.dart ====
 import 'package:flutter/material.dart';
 
 class LoginButton extends StatelessWidget {
@@ -3612,7 +3085,7 @@ class LoginButton extends StatelessWidget {
 }
 
 
-==== ./features/auth/presentation/widgets/login_form.dart ====
+==== ./auth/presentation/widgets/login_form.dart ====
 // import 'package:flutter/material.dart';
 // import 'email_field.dart';
 // import 'password_field.dart';
@@ -3637,7 +3110,7 @@ class LoginButton extends StatelessWidget {
 // }
 
 
-==== ./features/auth/presentation/widgets/forgot_password.dart ====
+==== ./auth/presentation/widgets/forgot_password.dart ====
 import 'package:flutter/material.dart';
 
 class ForgotPassword extends StatelessWidget {
@@ -3659,7 +3132,7 @@ class ForgotPassword extends StatelessWidget {
 }
 
 
-==== ./features/auth/presentation/widgets/email_field.dart ====
+==== ./auth/presentation/widgets/email_field.dart ====
 import 'package:dirassati/features/auth/presentation/widgets/label_text_style.dart';
 import 'package:flutter/material.dart';
 
@@ -3702,7 +3175,7 @@ class EmailField extends StatelessWidget {
 }
 
 
-==== ./features/auth/presentation/widgets/label_text_style.dart ====
+==== ./auth/presentation/widgets/label_text_style.dart ====
 import 'package:flutter/material.dart';
 
 const TextStyle labelTextStyle = TextStyle(
@@ -3711,7 +3184,7 @@ const TextStyle labelTextStyle = TextStyle(
     fontSize: 14,
   );
 
-==== ./features/auth/presentation/widgets/password_field.dart ====
+==== ./auth/presentation/widgets/password_field.dart ====
 import 'package:flutter/material.dart';
 import 'package:dirassati/features/auth/presentation/widgets/label_text_style.dart';
 import 'package:flutter_svg/svg.dart';
@@ -3796,7 +3269,7 @@ class _PasswordFieldState extends State<PasswordField> {
 }
 
 
-==== ./features/auth/presentation/pages/login_page.dart ====
+==== ./auth/presentation/pages/login_page.dart ====
 import 'package:dirassati/core/auth_info_provider.dart';
 import 'package:dirassati/core/services/notification_service.dart';
 import 'package:dirassati/features/acceuil/domain/providers/students_provider.dart';
@@ -3945,7 +3418,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 }
 
 
-==== ./features/auth/presentation/pages/auth_wrapper.dart ====
+==== ./auth/presentation/pages/auth_wrapper.dart ====
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/providers/auth_provider.dart';
@@ -3969,7 +3442,7 @@ class AuthWrapper extends ConsumerWidget {
 }
 
 
-==== ./features/auth/presentation/pages/home_page.dart ====
+==== ./auth/presentation/pages/home_page.dart ====
 import 'package:flutter/material.dart';
 import 'package:dirassati/features/acceuil/presentation/pages/acceuil_page.dart';
 import 'package:dirassati/features/profile/presentation/pages/profile_page.dart';
@@ -4034,42 +3507,5 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 }
-
-
-==== ./main.dart ====
-import 'package:dirassati/main_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import './core/services/shared_prefernces_service.dart';
-
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =FlutterLocalNotificationsPlugin();
-void main() async {
-  
-  WidgetsFlutterBinding.ensureInitialized();
-
-// Android initialization
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-
-  // iOS initialization (if needed)
-  const DarwinInitializationSettings initializationSettingsIOS =
-      DarwinInitializationSettings();
-
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-    iOS: initializationSettingsIOS,
-  );
-
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
-  final sharedPrefsService = SharedPreferencesService();
-  final seenOnboarding = await sharedPrefsService.getSeenOnboarding()&&false;
-
-  runApp( MainWidget(seenOnboarding: seenOnboarding));
-}
-
 
 

@@ -17,6 +17,9 @@ class _PasswordFormWidgetState extends ConsumerState<PasswordFormWidget> {
   final _formKey = GlobalKey<FormState>();
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
+  final passwordRegex = RegExp(
+    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$',
+  );
 
   bool _showErrorBox = false;
   String _errorMessage = "";
@@ -44,15 +47,19 @@ class _PasswordFormWidgetState extends ConsumerState<PasswordFormWidget> {
         setState(() {
           _isLoading = false;
         });
-        // Show success notification or navigate as needed.
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Password changed successfully!"),
-        ));
+        // After successful password change
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Mot de passe modifié avec succès!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context); // Return to previous screen
       } catch (e) {
         setState(() {
           _isLoading = false;
           _showErrorBox = true;
-          _errorMessage = "Échec: opération échouée, veuillez réessayer.";
+          _errorMessage = e.toString().replaceAll("Exception: ", "");
         });
       }
     }
@@ -114,8 +121,10 @@ class _PasswordFormWidgetState extends ConsumerState<PasswordFormWidget> {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return "Veuillez entrer un nouveau mot de passe";
-                } else if (value.length < 6) {
-                  return "Le mot de passe doit comporter au moins 6 caractères";
+                } else if (value.length < 8) {
+                  return "Le mot de passe doit comporter au moins 8 caractères";
+                } else if (!passwordRegex.hasMatch(value)) {
+                  return "Doit contenir majuscule, minuscule, chiffre et caractère spécial";
                 }
                 return null;
               },

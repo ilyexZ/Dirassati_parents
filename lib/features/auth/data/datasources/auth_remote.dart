@@ -1,10 +1,13 @@
 import 'package:dio/dio.dart';
+import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dirassati/core/shared_constants.dart';
+import 'package:dirassati/core/storage/secure_storage.dart';
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 
 class AuthRemoteDataSource {
   final Dio dio;
+  final SecureStorage secureStorage = SecureStorage();
 
   AuthRemoteDataSource(this.dio);
 
@@ -26,28 +29,57 @@ class AuthRemoteDataSource {
           data.containsKey('lastName')) {
         return UserModel.fromJson(data);
       } else {
-        
         throw Exception("Missing required fields in response: $data");
-        
       }
     } else {
       throw Exception("Login failed");
     }
   }
   // New method for changing password.
-  Future<void> changePassword(String currentPassword, String newPassword) async {
-    const endpoint = "http://$backendProviderIp/api/parent/"; // Replace with your endpoint
-    final response = await dio.post(endpoint, data: {
-      "current_password": currentPassword,
-      "new_password": newPassword,
-    });
+  // Future<void> changePassword(String currentPassword, String newPassword) async {
+  // final response = await dio.post(
+  //   'http://$backendProviderIp/api/parent/change-password',
+  //   data: {
+  //     "currentPassword": currentPassword,
+  //     "newPassword": newPassword,
+  //   },
+  // );
+
+  // if (response.statusCode != 200) {
+  //   final errorMessage = response.data['message'] ?? "Password change failed";
+  //   throw Exception(errorMessage);
+  // }
+// }
+  Future<void> changePassword(
+      String currentPassword, String newPassword) async {
+    // Retrieve the token from secure storage
+    final SecureStorage storage = SecureStorage();
+    final String? token = await storage.getToken();
+    clog("g", "$token");
+    if (token == null) {
+      throw Exception("No token found. Please log in again.");
+    }
+    clog("g", "Current Password Length: ${currentPassword.length}");
+    clog("g", "New Password Length: ${newPassword.length}");
+
+    final response = await dio.post(
+      'http://$backendProviderIp/api/Accounts/change-password',
+      data: {
+        "oldPassword": currentPassword,
+        "newPassword": newPassword,
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token', // Include the token here
+          'Content-Type': 'application/json',
+          'accept': '*/*',
+        },
+      ),
+    );
+
     if (response.statusCode != 200) {
-      // You might want to inspect response.data for more error details.
-      throw Exception("Password change failed");
+      final errorMessage = response.data['message'] ?? "Password change failed";
+      throw Exception(errorMessage);
     }
   }
-  
 }
-
-
-
