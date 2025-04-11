@@ -125,6 +125,7 @@ class _NotificationsPageState extends State<NotificationsPage>
           Expanded(
             child: TabBarView(
               controller: _tabController,
+              physics: const NeverScrollableScrollPhysics(),
               children: [
                 NotificationList(data: convocationsData),
                 NotificationList(data: absencesData),
@@ -132,7 +133,7 @@ class _NotificationsPageState extends State<NotificationsPage>
             ),
           ),
           // The red banner at the bottom
-          //const RedBanner(),
+          const RedBanner(),
         ],
       ),
       backgroundColor: Colors.white,

@@ -4,6 +4,7 @@ import 'package:dirassati/features/acceuil/domain/providers/students_provider.da
 import 'package:dirassati/features/profile/presentation/providers/profile_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../../../core/widgets/background_shapes.dart';
 import '../widgets/email_field.dart';
 import '../widgets/password_field.dart';
@@ -52,6 +53,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   SizedBox(
                     height: 35,
                   ),
+                  
                   EmailField(controller: emailController),
                   const SizedBox(height: 20),
                   PasswordField(controller: passwordController),
@@ -84,27 +86,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         );
                       }
                     },
-                    //  () async {
-                    //   try {
-                    //     FocusScope.of(context).unfocus();
-                    //     await authNotifier.login(
-                    //       emailController.text,
-                    //       passwordController.text,
-                    //     );
-                    //     // If login succeeds, proceed (e.g., navigate to Home).
-                    //   } catch (e) {
-                    //     ScaffoldMessenger.of(context).showSnackBar(
-                    //       SnackBar(
-                    //         behavior: SnackBarBehavior.floating,
-                    //         margin: const EdgeInsets.only(
-                    //             top: 20, left: 20, right: 20),
-                    //         content:
-                    //             const Text("Login failed: Invalid credentials"),
-                    //         backgroundColor: Colors.red,
-                    //       ),
-                    //     );
-                    //   }
-                    // },
+                   
                   ),
                   // Debug Login Button for testing:
                   ElevatedButton(

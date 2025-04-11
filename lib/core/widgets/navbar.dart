@@ -8,7 +8,7 @@ class Navbar extends StatefulWidget {
     super.key,
     required this.onIndexChanged,
     required this.currentIndex,
-  }) ;
+  });
 
   @override
   _NavbarState createState() => _NavbarState();
@@ -17,49 +17,43 @@ class Navbar extends StatefulWidget {
 class _NavbarState extends State<Navbar> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        // If swiped left (negative velocity), go to the next item
-        if (details.primaryVelocity != null && details.primaryVelocity! < 0) {
-          if (widget.currentIndex < 2) {
-            widget.onIndexChanged(widget.currentIndex + 1);
+    return SafeArea(
+      child: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity != null) {
+            if (details.primaryVelocity! < 0 && widget.currentIndex < 2) {
+              widget.onIndexChanged(widget.currentIndex + 1);
+            } else if (details.primaryVelocity! > 0 && widget.currentIndex > 0) {
+              widget.onIndexChanged(widget.currentIndex - 1);
+            }
           }
-        }
-        // If swiped right (positive velocity), go to the previous item
-        else if (details.primaryVelocity != null && details.primaryVelocity! > 0) {
-          if (widget.currentIndex > 0) {
-            widget.onIndexChanged(widget.currentIndex - 1);
-          }
-        }
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, -3),
-            ),
-          ],
-        ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: MediaQuery.of(context).size.width,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                    context, 0, Icons.home, Icons.home_outlined, "Acceuil"),
-                _buildNavItem(context, 1, Icons.notifications,
-                    Icons.notifications_outlined, "Notifications"),
-                _buildNavItem(context, 2, Icons.account_circle,
-                    Icons.account_circle_outlined, "Profile"),
-              ],
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 8,
+                offset: const Offset(0, -3),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: MediaQuery.of(context).size.width,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(0, Icons.home, Icons.home_outlined, "Acceuil"),
+                  _buildNavItem(1, Icons.notifications, Icons.notifications_outlined, "Notifications"),
+                  _buildNavItem(2, Icons.account_circle, Icons.account_circle_outlined, "Profile"),
+                ],
+              ),
             ),
           ),
         ),
@@ -67,20 +61,20 @@ class _NavbarState extends State<Navbar> {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, int index, IconData selectedIcon,
+  Widget _buildNavItem(int index, IconData selectedIcon, 
       IconData unselectedIcon, String label) {
     final bool isSelected = index == widget.currentIndex;
 
     return GestureDetector(
       onTap: () => widget.onIndexChanged(index),
       child: SizedBox(
-        height: 65,
+        height: 60,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
           padding: EdgeInsets.symmetric(
-            vertical: 10,
-            horizontal: isSelected ? 3 : 2,
+            vertical: 8,
+            horizontal: isSelected ? 2 : 1,
           ),
           child: Container(
             decoration: BoxDecoration(

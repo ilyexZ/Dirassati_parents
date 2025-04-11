@@ -24,6 +24,7 @@ class ProfilePage extends ConsumerWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
+        surfaceTintColor: Colors.transparent,
       ),
       body: profileAsyncValue.when(
         data: (profile) => SingleChildScrollView(

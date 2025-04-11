@@ -1,86 +1,114 @@
+import 'package:dirassati/core/widgets/shimmer_student_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../acceuil/domain/providers/students_provider.dart';
 import '../widgets/student_card.dart';
 
-class AcceuilPage extends ConsumerWidget {
+class AcceuilPage extends ConsumerStatefulWidget {
   const AcceuilPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AcceuilPage> createState() => _AcceuilPageState();
+}
+
+class _AcceuilPageState extends ConsumerState<AcceuilPage> {
+  bool _isRefreshing = false;
+
+  Future<void> _handleRefresh() async {
+    // Set refresh state to show shimmer placeholders
+    setState(() {
+      _isRefreshing = true;
+    });
+    
+    // Force a new fetch; this returns a Future that completes when the new data is ready
+    await ref.refresh(studentsProvider.future);
+    
+    // Optionally delay to make the loading state clearly visible
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    // Remove the refresh flag once data is reloaded
+    setState(() {
+      _isRefreshing = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final studentsAsyncValue = ref.watch(studentsProvider);
 
     return Scaffold(
-       appBar: AppBar(
-        backgroundColor: Color(0xFFEDEFFF),
+      appBar: AppBar(
+        backgroundColor: Color(0xffEDEFFF),
         surfaceTintColor: Colors.transparent,
-        title: Center(
-          child: const Text(
-            "LOGO",
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 30,
-            ),
-            textAlign: TextAlign.center,
-          ),
+        title:  Center(
+          child: Image.asset("assets/img/logo_h.png",width: 400,height: 40,),
         ),
       ),
-      backgroundColor: Colors.transparent,
+      backgroundColor: Color(0xffEDEFFF),
       body: Container(
-        margin: EdgeInsets.only(top: 8),
+        margin: const EdgeInsets.only(top: 8),
         decoration: BoxDecoration(
-          boxShadow: [BoxShadow(blurRadius: 4,spreadRadius: 1,color: Colors.black.withOpacity(0.3))],
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 4,
+              spreadRadius: 1,
+              color: Colors.black.withOpacity(0.3),
+            )
+          ],
           color: Colors.white,
           border: Border(),
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(30),
             topRight: Radius.circular(30),
           ),
         ),
         child: Column(
           children: [
-            Align(
+            const Align(
               alignment: Alignment.centerLeft,
               child: Padding(
-                
-                padding: const EdgeInsets.only(left: 20.0, top: 20.0,bottom: 10),
-                child: const Text(
+                padding: EdgeInsets.only(left: 20.0, top: 20.0, bottom: 10),
+                child: Text(
                   "Enfants",
                   style: TextStyle(
-                      color: CupertinoColors.systemIndigo,
-                      fontFamily: "Poppins",
-                      fontSize: 24,
-                      fontWeight: FontWeight.w500,
-                      shadows: [
-                        Shadow(
-                          color: CupertinoColors.systemIndigo,
-                          blurRadius: 3,
-                          offset: Offset(1, 1)
-                        ),
-                      ]),
+                    color: CupertinoColors.systemIndigo,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: ()async {
-                  ref.invalidate(studentsProvider);
-                },
-                child: studentsAsyncValue.when(
-                  data: (students) => ListView.builder(
-                    addAutomaticKeepAlives: false,
-                    itemCount: students.length,
-                    itemBuilder: (context, index) {
-                      final student = students[index];
-                      return StudentCard(student: student);
-                    },
-                  ),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (error, stackTrace) =>
-                      Center(child: Text("Error: $error")),
-                ),
+                onRefresh: _handleRefresh,
+                child: _isRefreshing
+                    // When refreshing, show shimmer placeholders
+                    ? ListView.builder(
+                        itemCount: 6,
+                        itemBuilder: (context, index) {
+                          return const ShimmerStudentCard();
+                        },
+                      )
+                    // Otherwise, use the existing AsyncValue state
+                    : studentsAsyncValue.when(
+                        data: (students) => ListView.builder(
+                          addAutomaticKeepAlives: false,
+                          itemCount: students.length,
+                          itemBuilder: (context, index) {
+                            final student = students[index];
+                            return StudentCard(student: student);
+                          },
+                        ),
+                        loading: () => ListView.builder(
+                          itemCount: 6, // Number of shimmer placeholders for initial load
+                          itemBuilder: (context, index) {
+                            return const ShimmerStudentCard();
+                          },
+                        ),
+                        error: (error, stackTrace) =>
+                            Center(child: Text("Error: $error")),
+                      ),
               ),
             ),
           ],

@@ -13,52 +13,67 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  int currentIndex = 0;
-  final PageController _pageController = PageController();
-
-  void _onIndexChanged(int newIndex) {
-    int previousIndex = currentIndex;
-    setState(() {
-      currentIndex = newIndex;
-    });
-    
-    // If the pages are not adjacent, jump directly
-    if ((newIndex - previousIndex).abs() > 1) {
-      _pageController.jumpToPage(newIndex);
-    } else {
-      _pageController.animateToPage(
-        newIndex,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
-    }
-  }
+  int _currentIndex = 0;
+  final PageController _pageController = PageController(keepPage: true);
+  final List<Widget> _pages = const [
+    _KeepAliveWrapper(child: AcceuilPage()),
+    _KeepAliveWrapper(child: NotificationsPage()),
+    _KeepAliveWrapper(child: ProfilePage()),
+  ];
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
+
+  void _onIndexChanged(int newIndex) {
+    if (newIndex == _currentIndex) return;
     
+    setState(() => _currentIndex = newIndex);
+    _pageController.jumpToPage(
+    // _pageController.animateToPage(
+      newIndex,
+      // duration: const Duration(milliseconds: 300),
+      // curve: Curves.easeOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
+      
       body: PageView(
-        
-        
         controller: _pageController,
-        onPageChanged: (index) => setState(() => currentIndex = index),
-        children: const [
-          AcceuilPage(),
-          NotificationsPage(),
-          ProfilePage(),
-        ],
+        onPageChanged: (index) => setState(() => _currentIndex = index),
+        children: _pages,
       ),
-      backgroundColor: const Color(0xffEDEFFF),
       bottomNavigationBar: Navbar(
-        currentIndex: currentIndex,
+        currentIndex: _currentIndex,
         onIndexChanged: _onIndexChanged,
       ),
+      backgroundColor: Colors.white,
     );
+  }
+}
+
+class _KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+  const _KeepAliveWrapper({required this.child});
+
+  @override
+  State<_KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<_KeepAliveWrapper> 
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }

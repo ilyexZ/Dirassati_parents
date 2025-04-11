@@ -7,6 +7,7 @@ class StudentsRepository {
   StudentsRepository(this.remoteDataSource);
 
   Future<List<Student>> fetchStudents(String parentId) async {
+    //await Future.delayed(Duration(seconds: 1));
   return await remoteDataSource.getStudents(parentId);
 }
 }

@@ -8,9 +8,9 @@ class RedBanner extends StatelessWidget {
     return Container(
       
       padding: EdgeInsets.all(0),
-      margin: const EdgeInsets.fromLTRB(8,0,8,20),
+      margin: const EdgeInsets.fromLTRB(8,0,8,15),
       width: double.infinity,
-      decoration: BoxDecoration( // Ensure background is visible
+      decoration: BoxDecoration(
         border: Border.all(color: Colors.grey, width: 1), // Grey border for all sides
         borderRadius: BorderRadius.circular(8), // Round the corners
       ),

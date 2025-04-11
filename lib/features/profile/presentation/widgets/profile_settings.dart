@@ -18,7 +18,7 @@ class ProfileSettings extends StatelessWidget {
         Container(
           width: double.infinity,
           color: Colors.white,
-          padding: const EdgeInsets.fromLTRB(16, 32, 16, 4),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 4),
           child: const Text(
             "Settings",
             style: TextStyle(

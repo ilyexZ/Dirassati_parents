@@ -23,11 +23,7 @@ final studentsRepositoryProvider = Provider<StudentsRepository>((ref) {
 final studentsProvider = FutureProvider<List<Student>>((ref) async {
   final parentId = await ref.watch(parentIdProvider.future);
   final repository = ref.watch(studentsRepositoryProvider);
-  return repository.fetchStudents(parentId); // Modify fetchStudents to accept parentId
+  return repository.fetchStudents(parentId); 
 });
 
-// FutureProvider to fetch the list of students.
-// final studentsProvider = FutureProvider<List<Student>>((ref) async {
-//   final repository = ref.watch(studentsRepositoryProvider);
-//   return repository.fetchStudents();
-// });
+

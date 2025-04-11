@@ -23,6 +23,15 @@ class NotesPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TabBar(
+                  overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                    (Set<WidgetState> states) {
+                  // Change the overlay color when a tab is pressed
+                  if (states.contains(WidgetState.pressed)) {
+                    return Colors.transparent;
+                  }
+
+                  return null; 
+                }),
                   //overlayColor: null,
                   //dragStartBehavior: DragStartBehavior.start,
                   
