@@ -1,4 +1,4 @@
-void clog(String c, String message) {
+void clog(String c, dynamic message) {
   final colors = {
     'r': '\x1B[31m', // Red
     'g': '\x1B[32m', // Green
@@ -9,5 +9,9 @@ void clog(String c, String message) {
     'x': '\x1B[0m',  // Reset
   };
 
-  print('${colors[c] ?? colors['x']}$message\x1B[0m');
+  final safeColor = colors[c] ?? '';
+  final safeMessage = message?.toString() ?? 'null';
+
+  // Use stdout.write to avoid any automatic newline weirdness
+  print('$safeColor$safeMessage\x1B[0m'); // 👈 always reset
 }

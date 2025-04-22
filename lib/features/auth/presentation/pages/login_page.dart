@@ -1,10 +1,10 @@
 import 'package:dirassati/core/auth_info_provider.dart';
 import 'package:dirassati/core/services/notification_service.dart';
+import 'package:dirassati/core/widgets/backend_ip_settings_screen.dart';
 import 'package:dirassati/features/acceuil/domain/providers/students_provider.dart';
 import 'package:dirassati/features/profile/presentation/providers/profile_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import '../../../../core/widgets/background_shapes.dart';
 import '../widgets/email_field.dart';
 import '../widgets/password_field.dart';
@@ -53,7 +53,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   SizedBox(
                     height: 35,
                   ),
-                  
+
                   EmailField(controller: emailController),
                   const SizedBox(height: 20),
                   PasswordField(controller: passwordController),
@@ -86,7 +86,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         );
                       }
                     },
-                   
                   ),
                   // Debug Login Button for testing:
                   ElevatedButton(
@@ -116,6 +115,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: const Text("Show Notification"),
                   ),
 
+                  IconButton(
+                    icon: const Icon(Icons.settings),
+                    tooltip: 'Backend Settings',
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const BackendIpSettingsScreen(),
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 100),
                 ],
               ),

@@ -1,8 +1,5 @@
 import 'package:dirassati/main.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:dirassati/core/shared_constants.dart';
-import 'package:dirassati/core/auth_info_provider.dart';
 
 Future<void> showStaticNotification() async {
   const AndroidNotificationDetails androidPlatformChannelSpecifics =

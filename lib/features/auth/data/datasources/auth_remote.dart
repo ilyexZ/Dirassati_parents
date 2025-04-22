@@ -8,13 +8,15 @@ import '../models/user_model.dart';
 class AuthRemoteDataSource {
   final Dio dio;
   final SecureStorage secureStorage = SecureStorage();
+String get backendUrl => BackendProvider.backendProviderIp;
+
 
   AuthRemoteDataSource(this.dio);
 
   Future<UserModel> login(String email, String password) async {
     debugPrint("$email $password");
     final response = await dio.post(
-      'http://$backendProviderIp/api/parent/auth/login',
+      'http://$backendUrl/api/parent/auth/login',
       data: {
         'email': email,
         'password': password,
@@ -38,7 +40,7 @@ class AuthRemoteDataSource {
   // New method for changing password.
   // Future<void> changePassword(String currentPassword, String newPassword) async {
   // final response = await dio.post(
-  //   'http://$backendProviderIp/api/parent/change-password',
+  //   'http://$backendUrl/api/parent/change-password',
   //   data: {
   //     "currentPassword": currentPassword,
   //     "newPassword": newPassword,
@@ -63,7 +65,7 @@ class AuthRemoteDataSource {
     clog("g", "New Password Length: ${newPassword.length}");
 
     final response = await dio.post(
-      'http://$backendProviderIp/api/Accounts/change-password',
+      'http://$backendUrl/api/Accounts/change-password',
       data: {
         "oldPassword": currentPassword,
         "newPassword": newPassword,

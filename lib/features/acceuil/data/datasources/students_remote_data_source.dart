@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dirassati/core/shared_constants.dart';
 import 'package:dirassati/features/acceuil/data/models/note_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -8,6 +9,9 @@ import '../models/student_model.dart';
 class StudentsRemoteDataSource {
   final Dio dio;
   final FlutterSecureStorage storage;
+  String get backendUrl => BackendProvider.backendProviderIp;
+
+
 
   // Define a debug token for debugging purposes.
   static const String debugToken = "debug_dummy_token";
@@ -19,7 +23,7 @@ class StudentsRemoteDataSource {
 
   Future<List<Student>> getStudents(String parentId) async {
   // Use parentId in the API call
-  //final response = await dio.get("http://$backendProviderIp/api/parents/$parentId/students");
+  //final response = await dio.get("http://$backendUrl/api/parents/$parentId/students");
     // Read token from secure storage.
     final token = await storage.read(key: 'auth_token');
     if (token == null) {
@@ -40,9 +44,10 @@ class StudentsRemoteDataSource {
     }
     
     // Make the GET request using the extracted parentId.
-    final response = await dio.get("http://$backendProviderIp/api/parents/$parentId/students");
+    final response = await dio.get("http://$backendUrl/api/parents/$parentId/students");
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data;
+      clog("b", data);
       return data.map((json) => Student.fromJson(json)).toList();
     } else {
       throw Exception("Failed to fetch students");

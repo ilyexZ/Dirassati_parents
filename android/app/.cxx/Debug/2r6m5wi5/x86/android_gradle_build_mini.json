@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/home/ilyes/development/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/usr/bin/ninja",
+      "-C",
+      "/media/ilyes/extraMint/projects/dirassati/android/app/.cxx/Debug/2r6m5wi5/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/usr/bin/ninja",
+    "-C",
+    "/media/ilyes/extraMint/projects/dirassati/android/app/.cxx/Debug/2r6m5wi5/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

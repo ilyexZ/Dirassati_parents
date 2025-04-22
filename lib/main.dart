@@ -1,3 +1,4 @@
+import 'package:dirassati/core/shared_constants.dart';
 import 'package:dirassati/main_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,8 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =FlutterLo
 void main() async {
   
   WidgetsFlutterBinding.ensureInitialized();
+
+  await BackendProvider.init(); 
 
 // Android initialization
   const AndroidInitializationSettings initializationSettingsAndroid =

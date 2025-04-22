@@ -9,7 +9,10 @@ class Student {
   final String? birthPlace;
   final String? birthDate;
   final String? classe;
-
+@override
+  String toString() {
+    return 'Student(firstName: $firstName, lastName: $lastName, birthDate: $birthDate, birthPlace: $birthPlace)';
+  }
   Student({
     required this.studentId,
     required this.firstName,

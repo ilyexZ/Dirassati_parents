@@ -1,3 +1,4 @@
+import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dirassati/core/widgets/shimmer_student_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -97,6 +98,7 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
                           itemCount: students.length,
                           itemBuilder: (context, index) {
                             final student = students[index];
+                            //clog("y", student);
                             return StudentCard(student: student);
                           },
                         ),

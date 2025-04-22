@@ -42,9 +42,8 @@ class StudentCard extends StatelessWidget {
                       tag: 'student-${student.studentId}', // Unique tag
                       child: CircleAvatar(
                         radius: 28,
-                        backgroundImage: NetworkImage(
-                          "https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250",
-                        ),
+                        backgroundImage: AssetImage("assets/img/pfp.png"),
+                        backgroundColor: Colors.transparent,
                       ),
                     ),
                     const SizedBox(width: 12),

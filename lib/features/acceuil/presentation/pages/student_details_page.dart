@@ -1,4 +1,5 @@
 import 'package:dirassati/core/background_shapes_toponly.dart';
+import 'package:dirassati/core/widgets/full_screen_avatar.dart';
 import 'package:dirassati/features/acceuil/data/models/student_model.dart';
 import 'package:dirassati/features/acceuil/presentation/widgets/activities_widget.dart';
 import 'package:dirassati/features/acceuil/presentation/widgets/informations_generales_widget.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 class StudentDetailsPage extends StatelessWidget {
   final Student student;
 
+  static final tempImage = AssetImage("assets/img/pfp.png");
   const StudentDetailsPage({super.key, required this.student});
 
   @override
@@ -17,21 +19,24 @@ class StudentDetailsPage extends StatelessWidget {
         child: BackgroundShapesToponly(
           child2: Column(
             children: [
-              Text(
-                "LOGO",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              // Wrap the profile image in a Hero widget using the same tag as StudentCard.
-              Hero(
-                tag: 'student-${student.studentId}',
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundImage: NetworkImage(
-                    "https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250",
-                  ),
+               Image.asset("assets/img/logo_h.png",width: 400,height: 40,),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      opaque: false, // Makes the route non-opaque.
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          FullScreenAvatar(
+                        tag: 'student-${student.studentId}',
+                        child: Image(image: tempImage),
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: 'student-${student.studentId}',
+                  child: CircleAvatar(radius: 50, backgroundImage: tempImage,backgroundColor: Colors.transparent,),
                 ),
               ),
             ],

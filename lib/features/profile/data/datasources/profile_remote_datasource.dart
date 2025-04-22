@@ -11,13 +11,15 @@ abstract class ProfileRemoteDataSource {
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   final Dio dio;
   final Ref ref;
+ String get backendUrl => BackendProvider.backendProviderIp;
+
 
   ProfileRemoteDataSourceImpl({required this.dio, required this.ref});
 
   @override
   Future<Profile> fetchProfile() async {
     final parentID = await ref.read(parentIdProvider.future);
-    final url = "http://$backendProviderIp/api/parents/$parentID";
+    final url = "http://$backendUrl/api/parents/$parentID";
 
     // For now, you can return static data if you wish:
     if (parentID == "debugparentID") {

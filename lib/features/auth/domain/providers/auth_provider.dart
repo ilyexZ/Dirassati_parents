@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:dirassati/core/core_providers.dart';
 import 'package:dirassati/core/services/colorLog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
