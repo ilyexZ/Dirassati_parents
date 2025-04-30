@@ -1,0 +1,2 @@
+/media/ilyes/extraMint/projects/dirassati/android/app/.cxx/Debug/3l4o6c25/x86_64/CMakeFiles/edit_cache.dir
+/media/ilyes/extraMint/projects/dirassati/android/app/.cxx/Debug/3l4o6c25/x86_64/CMakeFiles/rebuild_cache.dir

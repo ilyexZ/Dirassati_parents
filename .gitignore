@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+# Ignore all files ending in _allcode.txt
+*_allcode.txt
+

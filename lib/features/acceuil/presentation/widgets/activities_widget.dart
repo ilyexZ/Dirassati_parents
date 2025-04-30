@@ -1,4 +1,5 @@
 import 'package:dirassati/features/acceuil/presentation/pages/notes_page.dart';
+import 'package:dirassati/features/time_table/presentation/pages/time_table_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -22,7 +23,16 @@ class ActivitesWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           // Example activities
-          _buildActivityRow(Icons.calendar_month_outlined, "Emploi du temps"),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TimeTablePage()),
+              );
+            },
+            child: _buildActivityRow(
+                Icons.calendar_month_outlined, "Emploi du temps"),
+          ),
           Divider(),
           GestureDetector(
               onTap: () {

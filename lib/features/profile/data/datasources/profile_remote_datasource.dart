@@ -26,8 +26,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return Profile(
         parentId: "1f0fd9ac-d8bb-4089-b952-7f482ebc41da",
         occupation: "Teacher",
-        firstName: "Jane",
-        lastName: "Doe",
+        firstName: "JaneDebug",
+        lastName: "DoeDebug",
         birthDate: "31/12/9999",
         userName: "parent@example.com",
         email: "parent@example.com",

@@ -1,5 +1,6 @@
 import 'package:dirassati/core/core_providers.dart';
 import 'package:dirassati/core/services/colorLog.dart';
+import 'package:dirassati/core/services/signalr_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // or your secure storage wrapper
 import '../../data/models/user_model.dart';
@@ -25,7 +26,12 @@ class AuthStateNotifier extends StateNotifier<UserModel?> {
   final AuthRepository _authRepository;
   final FlutterSecureStorage _secureStorage;
 
-  AuthStateNotifier(this._authRepository, this._secureStorage) : super(null);
+  late final SignalRService _signalRService;
+  
+
+  AuthStateNotifier(this._authRepository, this._secureStorage)
+  : _signalRService = SignalRService(),
+   super(null);
 
   Future<void> login(String email, String password) async {
     final user = await _authRepository.login(email, password);
@@ -34,6 +40,7 @@ class AuthStateNotifier extends StateNotifier<UserModel?> {
     }
     await _secureStorage.write(key: 'auth_token', value: user.token);
     state = user;
+    await _signalRService.startConnection();
 
   }
 
@@ -41,6 +48,7 @@ class AuthStateNotifier extends StateNotifier<UserModel?> {
     
     await _secureStorage.delete(key: 'auth_token');
     clog('r', "Logged out");
+    await _signalRService.stopConnection();
     state = null;
   }
   

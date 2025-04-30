@@ -1,42 +1,22 @@
-import 'package:flutter/material.dart';
+// lib/features/notifications/presentation/pages/notifications_child.dart
 
-class NotificationsChildPage extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dirassati/features/notifications/domain/providers/notification_provider.dart';
+
+class NotificationsChildPage extends ConsumerStatefulWidget {
   const NotificationsChildPage({super.key});
 
   @override
-  State<NotificationsChildPage> createState() => _NotificationsPageState();
+  ConsumerState<NotificationsChildPage> createState() =>
+      _NotificationsPageState();
 }
 
-class _NotificationsPageState extends State<NotificationsChildPage>
+class _NotificationsPageState extends ConsumerState<NotificationsChildPage>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  late final TabController _tabController;
 
-  // Example data for the Convocations tab
-  final List<Map<String, String>> convocationsData = [
-    {
-      'title': 'Mr. LastName',
-      'subtitle': 'mauvaise conduite',
-      'child': 'Enfant concernée : LastName First',
-      'description': 'Vous devriez venir pour que nous réglions ce problème.',
-      'date': '25 Janvier 2025 - 9:00 AM',
-    },
-    {
-      'title': 'Mr. LastName',
-      'subtitle': 'mauvaise conduite',
-      'child': 'Enfant concernée : LastName First',
-      'description': 'Vous devriez venir pour que nous réglions ce problème.',
-      'date': '25 Janvier 2025 - 9:00 AM',
-    },
-    {
-      'title': 'Mr. LastName',
-      'subtitle': 'mauvaise conduite',
-      'child': 'Enfant concernée : LastName First',
-      'description': 'Vous devriez venir pour que nous réglions ce problème.',
-      'date': '25 Janvier 2025 - 9:00 AM',
-    },
-  ];
-
-  // Example data for the Absences tab
+  // static Absences data kept as-is
   final List<Map<String, String>> absencesData = [
     {
       'title': 'Mr. LastName',
@@ -57,7 +37,6 @@ class _NotificationsPageState extends State<NotificationsChildPage>
   @override
   void initState() {
     super.initState();
-    // Initialize the TabController with 2 tabs
     _tabController = TabController(length: 2, vsync: this);
   }
 
@@ -67,7 +46,7 @@ class _NotificationsPageState extends State<NotificationsChildPage>
     super.dispose();
   }
 
-  Widget _buildNotificationCard(Map<String, String> data) {
+  Widget _buildNotificationCard(Map<String, dynamic> data) {
     return Card(
       elevation: 1,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -76,17 +55,14 @@ class _NotificationsPageState extends State<NotificationsChildPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title & subtitle
             Text(
               '${data['title']} — ${data['subtitle']}',
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 15,
               ),
-              
             ),
             const SizedBox(height: 4),
-            // Child info
             Text(
               data['child'] ?? '',
               style: const TextStyle(
@@ -95,15 +71,11 @@ class _NotificationsPageState extends State<NotificationsChildPage>
               ),
             ),
             const SizedBox(height: 4),
-            // Description
             Text(
               data['description'] ?? '',
-              style: const TextStyle(
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 8),
-            // Date
             Row(
               children: [
                 const Text(
@@ -129,12 +101,14 @@ class _NotificationsPageState extends State<NotificationsChildPage>
     );
   }
 
-  Widget _buildConvocationsTab() {
+  Widget _buildConvocationsTab(List<Map<String, dynamic>> convocationsData) {
+    if (convocationsData.isEmpty) {
+      return const Center(child: Text('Aucune convocation pour l’instant.'));
+    }
     return ListView.builder(
       itemCount: convocationsData.length,
       itemBuilder: (context, index) {
-        final item = convocationsData[index];
-        return _buildNotificationCard(item);
+        return _buildNotificationCard(convocationsData[index]);
       },
     );
   }
@@ -143,21 +117,29 @@ class _NotificationsPageState extends State<NotificationsChildPage>
     return ListView.builder(
       itemCount: absencesData.length,
       itemBuilder: (context, index) {
-        final item = absencesData[index];
-        return _buildNotificationCard(item);
+        // cast your static Map<String,String> into Map<String,dynamic>
+        return _buildNotificationCard(
+            absencesData[index].cast<String, dynamic>());
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Watch the live notifications list
+    final rawNotifications = ref.watch(notificationsProvider);
+    // Ensure each item is a Map<String,dynamic>
+    final convocationsData = rawNotifications
+        .map((e) => (e as Map).cast<String, dynamic>())
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
-        foregroundColor: Colors.black, // Back button color
+        foregroundColor: Colors.black,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Container(
@@ -177,17 +159,15 @@ class _NotificationsPageState extends State<NotificationsChildPage>
       ),
       body: Column(
         children: [
-          // Expanded so the tabs fill remaining space
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildConvocationsTab(),
+                _buildConvocationsTab(convocationsData),
                 _buildAbsencesTab(),
               ],
             ),
           ),
-          // Red banner at the bottom
           Container(
             width: double.infinity,
             color: Colors.red,
