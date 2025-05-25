@@ -1,5 +1,8 @@
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dirassati/core/widgets/shimmer_student_card.dart';
+import 'package:dirassati/features/school_info/domain/models/school_info_model.dart';
+import 'package:dirassati/features/school_info/presentation/pages/school_info_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,13 +24,13 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
     setState(() {
       _isRefreshing = true;
     });
-    
+
     // Force a new fetch; this returns a Future that completes when the new data is ready
     await ref.refresh(studentsProvider.future);
-    
+
     // Optionally delay to make the loading state clearly visible
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     // Remove the refresh flag once data is reloaded
     setState(() {
       _isRefreshing = false;
@@ -42,8 +45,12 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
       appBar: AppBar(
         backgroundColor: Color(0xffEDEFFF),
         surfaceTintColor: Colors.transparent,
-        title:  Center(
-          child: Image.asset("assets/img/logo_h.png",width: 400,height: 40,),
+        title: Center(
+          child: Image.asset(
+            "assets/img/logo_h.png",
+            width: 400,
+            height: 40,
+          ),
         ),
       ),
       backgroundColor: Color(0xffEDEFFF),
@@ -66,19 +73,38 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
         ),
         child: Column(
           children: [
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(left: 20.0, top: 20.0, bottom: 10),
-                child: Text(
-                  "Enfants",
-                  style: TextStyle(
-                    color: CupertinoColors.systemIndigo,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w500,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 20.0, top: 20.0, bottom: 10),
+                    child: Text(
+                      "Enfants",
+                      style: TextStyle(
+                        color: CupertinoColors.systemIndigo,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 32,vertical: 16),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SchoolInfoPage()),
+                      );
+                    },
+                    child: Icon(CommunityMaterialIcons.school_outline,size: 32,),
+                  ),
+                )
+              ],
             ),
             Expanded(
               child: RefreshIndicator(
@@ -103,7 +129,8 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
                           },
                         ),
                         loading: () => ListView.builder(
-                          itemCount: 6, // Number of shimmer placeholders for initial load
+                          itemCount:
+                              6, // Number of shimmer placeholders for initial load
                           itemBuilder: (context, index) {
                             return const ShimmerStudentCard();
                           },

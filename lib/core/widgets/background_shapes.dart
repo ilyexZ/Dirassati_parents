@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 
 class BackgroundShapes extends StatelessWidget {
   final Widget child;
-
   const BackgroundShapes({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
+    
     return Stack(
       children: [
         Positioned.fill(
@@ -19,13 +18,18 @@ class BackgroundShapes extends StatelessWidget {
           ),
         ),
         Positioned(
-            top: 60 * screenHeight / 917,
-            left: 0,
-            right: 0,
-            child:  Center(
-              child: Image.asset("assets/img/logo_h.png",width: 300,height: 30,),
+          top: 60 * screenHeight / 917,
+          left: 0,
+          right: 0,
+          child: Center(
+            // Making the logo responsive too
+            child: Image.asset(
+              "assets/img/logo_h.png",
+              width: 300 * (screenWidth / 412), // Scale logo width proportionally
+              height: 30 * (screenWidth / 412),  // Scale logo height proportionally
             ),
           ),
+        ),
         child,
       ],
     );
@@ -35,53 +39,72 @@ class BackgroundShapes extends StatelessWidget {
 class ShapesPainter extends CustomPainter {
   final double screenHeight;
   final double screenWidth;
-
   static Color shapeColor = Color(0xFF7B88F0);
+
   ShapesPainter({required this.screenWidth, required this.screenHeight});
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint1 = Paint()..color = shapeColor.withOpacity(0.5);
-    Paint paint2 = Paint()..color = shapeColor
+    Paint paint2 = Paint()
+      ..color = shapeColor
       ..style = PaintingStyle.stroke // Outline only
       ..strokeWidth = 2; // Border thickness
 
-    // Scaling based on Figma's reference height
-    final scaleH = screenWidth / 412;
-    final scaleV = screenHeight / 917;
+    // Use uniform scaling based on width to maintain aspect ratios
+    // This ensures shapes keep their proportions across all screen sizes
+    final scale = screenWidth / 412; // Reference width from your Figma design
+    
+    // Scale stroke width proportionally too for consistency
+    paint2.strokeWidth = 2 * scale;
 
-    final double circle1diam = scaleV * 500;
-
-    // Top Ellipse
-    Rect ellipseRect = Rect.fromCenter(
-      center: Offset(screenWidth / 2, -140 * scaleV),
-      width: circle1diam,
-      height: circle1diam,
+    // Top Ellipse - positioned and sized proportionally
+    final double topCircleDiameter = 500 * scale; // Consistent scaling
+    Rect topEllipseRect = Rect.fromCenter(
+      center: Offset(
+        screenWidth / 2, // Center horizontally
+        -140 * scale,    // Position vertically with same scale
+      ),
+      width: topCircleDiameter,
+      height: topCircleDiameter,
     );
-    canvas.drawOval(ellipseRect, paint1);
+    canvas.drawOval(topEllipseRect, paint1);
 
-    // Bottom Right Ellipses
-    Rect ellipseRect2 = Rect.fromCenter(
-      center: Offset((261 + 366 / 2) * scaleH, (651 + 366 / 2) * scaleV),
-      width: 366 * scaleV,
-      height: 366 * scaleV,
+    // Bottom Right Ellipses - maintaining consistent scaling
+    final double bottomCircleDiameter = 366 * scale;
+    
+    // First bottom right ellipse (filled)
+    Rect bottomRightEllipse1 = Rect.fromCenter(
+      center: Offset(
+        (261 + 366 / 2) * scale, // X position scaled consistently
+        screenHeight - (917 - (651 + 366 / 2)) * scale, // Y position relative to bottom
+      ),
+      width: bottomCircleDiameter,
+      height: bottomCircleDiameter,
     );
-    canvas.drawOval(ellipseRect2, paint1);
+    canvas.drawOval(bottomRightEllipse1, paint1);
 
-    Rect ellipseRect25 = Rect.fromCenter(
-      center: Offset((279 + 366 / 2) * scaleH, (651 + 366 / 2) * scaleV),
-      width: 366 * scaleV,
-      height: 366 * scaleV,
+    // Second bottom right ellipse (outline) - slightly offset
+    Rect bottomRightEllipse2 = Rect.fromCenter(
+      center: Offset(
+        (279 + 366 / 2) * scale, // X position scaled consistently
+        screenHeight - (917 - (651 + 366 / 2)) * scale, // Y position relative to bottom
+      ),
+      width: bottomCircleDiameter,
+      height: bottomCircleDiameter,
     );
-    canvas.drawOval(ellipseRect25, paint2);
+    canvas.drawOval(bottomRightEllipse2, paint2);
 
     // Bottom Left Ellipse
-    Rect ellipseRect3 = Rect.fromCenter(
-      center: Offset((-44 + 366 / 2) * scaleH, (763 + 366 / 2) * scaleV),
-      width: 366 * scaleV,
-      height: 366 * scaleV,
+    Rect bottomLeftEllipse = Rect.fromCenter(
+      center: Offset(
+        (-44 + 366 / 2) * scale, // X position scaled consistently
+        screenHeight - (917 - (763 + 366 / 2)) * scale, // Y position relative to bottom
+      ),
+      width: bottomCircleDiameter,
+      height: bottomCircleDiameter,
     );
-    canvas.drawOval(ellipseRect3, paint1);
+    canvas.drawOval(bottomLeftEllipse, paint1);
   }
 
   @override

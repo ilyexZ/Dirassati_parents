@@ -20,70 +20,96 @@ class ProfilePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profile",style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),),
+        title: const Text(
+          "Profile",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
         surfaceTintColor: Colors.transparent,
       ),
-      body: profileAsyncValue.when(
-        data: (profile) => SingleChildScrollView(
-          child: Column(
-            children: [
-              // Pass the dynamic profile to the header and info widgets.
-              ProfileHeader(profile: profile),
-              ProfileInfo(profile: profile),
-              // You can keep settings static or later link them to further endpoints.
-              ProfileSettings(
-                settings: [
-                  {
-                    'title': "Changer mot de passe",
-                    'icon': PhosphorIcons.lockSimple(),
-                    'onTap': () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ChangePasswordPage()),
-                      );
-                    }
-                  },
-                  {
-                    'title': "Changer numero de téléphone",
-                    'icon': PhosphorIcons.phone(),
-                    'onTap': () {}
-                  },
-                  {
-                    'title': "Changer adresse email",
-                    'icon': PhosphorIcons.envelopeSimple(),
-                    'onTap': () {},
-                  },
-                  {
-                    'title': "Aide",
-                    'icon': PhosphorIcons.question(),
-                    'onTap': () {}
-                  },
-                  {
-                    'title': "Se déconnecter",
-                    'icon': PhosphorIcons.signOut(),
-                    'onTap': () async {
-                      await ref.read(authStateProvider.notifier).logout();
-                      // Invalidate providers to clear cached data
-                      ref.invalidate(authInfoProvider);
-                      ref.invalidate(parentIdProvider);
-                      ref.invalidate(profileProvider);
-                      ref.invalidate(studentsProvider); // Add this line
-                      clog('g',"Logged out successfully");
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // Invalidate & re-fetch the profile
+          ref.invalidate(profileProvider);
+          ref.invalidate(authInfoProvider);
+          ref.invalidate(parentIdProvider);
+          ref.invalidate(studentsProvider);
+          await Future.delayed(const Duration(milliseconds: 300));
+        },
+        child: profileAsyncValue.when(
+          data: (profile) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                // Pass the dynamic profile to the header and info widgets.
+                ProfileHeader(profile: profile),
+                ProfileInfo(profile: profile),
+                // You can keep settings static or later link them to further endpoints.
+                ProfileSettings(
+                  settings: [
+                    {
+                      'title': "Changer mot de passe",
+                      'icon': PhosphorIcons.lockSimple(),
+                      'onTap': () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ChangePasswordPage()),
+                        );
+                      }
                     },
-                    'iconColor': const Color(0xFFDC2626),
-                    'trailingIcon': false,
-                  },
-                ],
-              ),
-            ],
+                    {
+                      'title': "Changer numero de téléphone",
+                      'icon': PhosphorIcons.phone(),
+                      'onTap': () {}
+                    },
+                    {
+                      'title': "Changer adresse email",
+                      'icon': PhosphorIcons.envelopeSimple(),
+                      'onTap': () {},
+                    },
+                    {
+                      'title': "Aide",
+                      'icon': PhosphorIcons.question(),
+                      'onTap': () {}
+                    },
+                    {
+                      'title': "Se déconnecter",
+                      'icon': PhosphorIcons.signOut(),
+                      'onTap': () async {
+                        await ref.read(authStateProvider.notifier).logout();
+                        // Invalidate providers to clear cached data
+                        ref.invalidate(authInfoProvider);
+                        ref.invalidate(parentIdProvider);
+                        ref.invalidate(profileProvider);
+                        ref.invalidate(studentsProvider); // Add this line
+                        clog('g', "Logged out successfully");
+                      },
+                      'iconColor': const Color(0xFFDC2626),
+                      'trailingIcon': false,
+                    },
+                  ],
+                ),
+              ],
+            ),
+          ),
+          loading: () => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          ),
+          error: (error, stack) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: Center(child: Text("Erreur: $error")),
+            ),
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text("Error: $error")),
       ),
       backgroundColor: Colors.white,
     );

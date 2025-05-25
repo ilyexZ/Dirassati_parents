@@ -1,20 +1,21 @@
+import 'package:dirassati/features/notifications/domain/providers/notification_provider.dart';
 import 'package:dirassati/features/notifications/presentation/widgets/notification_list.dart';
 import 'package:dirassati/features/notifications/presentation/widgets/red_banner.dart';
 import 'package:dirassati/features/notifications/presentation/widgets/static_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NotificationsPage extends StatefulWidget {
-  const NotificationsPage({super.key});
+// Notifications page showing convocations and absences
+class NotificationsPage extends ConsumerStatefulWidget {
+  const NotificationsPage({Key? key}) : super(key: key);
 
   @override
-  State<NotificationsPage> createState() => _NotificationsPageState();
+  ConsumerState<NotificationsPage> createState() => _NotificationsPageState();
 }
 
-class _NotificationsPageState extends State<NotificationsPage>
+class _NotificationsPageState extends ConsumerState<NotificationsPage>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  // Example data for the Convocations tab
+  late final TabController _tabController;
 
   @override
   void initState() {
@@ -28,28 +29,26 @@ class _NotificationsPageState extends State<NotificationsPage>
     super.dispose();
   }
 
-  /// Helper method to build a tab with a vertical divider to its right
-  Widget _buildTabWithDivider(String text, bool last) {
-    const double divderspacing = 20;
+  Widget _buildTabWithDivider(String text, bool isLast) {
+    const double spacing = 20;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (last)
+        if (isLast)
           Container(
-            margin: EdgeInsets.only(right: divderspacing),
+            margin: const EdgeInsets.only(right: spacing),
             width: 1,
             height: 20,
             color: Colors.grey[300],
           ),
         Expanded(
           child: Align(
-            alignment: last ? Alignment.centerLeft : Alignment.centerRight,
+            alignment: isLast ? Alignment.centerLeft : Alignment.centerRight,
             child: Tab(text: text),
           ),
         ),
-        if (!last)
+        if (!isLast)
           Container(
-            margin: EdgeInsets.only(left: divderspacing),
+            margin: const EdgeInsets.only(left: spacing),
             width: 1,
             height: 20,
             color: Colors.grey[300],
@@ -60,10 +59,18 @@ class _NotificationsPageState extends State<NotificationsPage>
 
   @override
   Widget build(BuildContext context) {
+    // Watch provider that returns List<Map<String, String>>
+    final rawNotifications = ref.watch(notificationsProvider);
+
+    // Convert each Map<dynamic, dynamic> to Map<String, String>
+    final absenceItems = rawNotifications
+        .map((n) => n.cast<String, String>())
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Notifications",
+          'Notifications',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
         backgroundColor: Colors.white,
@@ -75,64 +82,41 @@ class _NotificationsPageState extends State<NotificationsPage>
             mainAxisSize: MainAxisSize.min,
             children: [
               TabBar(
-                overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                    (Set<WidgetState> states) {
-                  // Change the overlay color when a tab is pressed
-                  if (states.contains(WidgetState.pressed)) {
-                    return Colors.transparent;
-                  }
-
-                  return null; 
-                }),
-                dividerColor: Colors.transparent,
+                controller: _tabController,
                 labelColor: const Color(0xFF4D44B5),
+                unselectedLabelColor: Colors.grey,
                 indicatorColor: const Color(0xFF4D44B5),
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicatorWeight: 2,
-                unselectedLabelColor: Colors.grey,
-                controller: _tabController,
-
-                labelPadding: EdgeInsets.zero,
-
-                // Moves the indicator line up or down
-                indicatorPadding: const EdgeInsets.only(bottom: 12),
-                labelStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                ),
+                overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                    (states) => states.contains(MaterialState.pressed)
+                        ? Colors.transparent
+                        : null),
+                labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                 tabs: [
-                  _buildTabWithDivider("Convocations", false),
-                  _buildTabWithDivider("Absences", true),
+                  Tab(text:'Convocations'),
+                  Tab(text:'Absences'),
                 ],
-                tabAlignment: TabAlignment.fill,
               ),
-              // This divider sits just below the tabs
-              Transform.translate(
-                offset: const Offset(0, -12),
-                child: Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: Colors.grey[300],
-                ),
-              ),
+              const Divider(height: 1, thickness: 1, color: Colors.grey),
             ],
           ),
         ),
       ),
       body: Column(
         children: [
-          // TabBarView for content
           Expanded(
             child: TabBarView(
               controller: _tabController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
+                // Static convocations
                 NotificationList(data: convocationsData),
-                NotificationList(data: absencesData),
+                // Dynamic absences
+                NotificationList(data: absenceItems),
               ],
             ),
           ),
-          // The red banner at the bottom
           const RedBanner(),
         ],
       ),

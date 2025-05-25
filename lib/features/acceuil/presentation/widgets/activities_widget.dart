@@ -1,3 +1,5 @@
+import 'package:community_material_icon/community_material_icon.dart';
+import 'package:dirassati/features/absences/presentation/pages/absences_page.dart';
 import 'package:dirassati/features/acceuil/presentation/pages/notes_page.dart';
 import 'package:dirassati/features/time_table/presentation/pages/time_table_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -42,8 +44,18 @@ class ActivitesWidget extends StatelessWidget {
                 );
               },
               child: _buildActivityRow(PhosphorIconsBold.fileText, "Notes")),
+               Divider(),
+          GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AbsencesPage()),
+                );
+              },
+              child: _buildActivityRow(Icons.check_circle_outline, "Présence")),
           Divider(),
-          _buildActivityRow(Icons.check_circle_outline, "Présence"),
+          
+          
         ],
       ),
     );

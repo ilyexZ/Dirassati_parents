@@ -29,6 +29,7 @@ class _PasswordFieldState extends State<PasswordField> {
           child: TextField(
             autofillHints: const [AutofillHints.password],
             controller: widget.controller,
+            
             enableSuggestions: false,
             enableInteractiveSelection: true,
             obscureText: isObscured,

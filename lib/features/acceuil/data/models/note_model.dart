@@ -1,20 +1,23 @@
 // lib/features/acceuil/data/models/note_model.dart
 class Note {
-  final String title;
-  final int coef;
-  final double grade;
+  final String examTypeName;
+  final int trimester;
+  final double value;
+  final String subjectName;
 
   Note({
-    required this.title,
-    required this.coef,
-    required this.grade,
+    required this.examTypeName,
+    required this.trimester,
+    required this.value,
+    required this.subjectName,
   });
 
   factory Note.fromJson(Map<String, dynamic> json) {
     return Note(
-      title: json['title'] as String,
-      coef: json['coef'] as int,
-      grade: (json['grade'] as num).toDouble(),
+      examTypeName: json['examTypeName'] as String,
+      subjectName: json['subjectName'] as String,
+      trimester: json['tremester'] as int,
+      value: (json['value'] as num).toDouble(),
     );
   }
 }

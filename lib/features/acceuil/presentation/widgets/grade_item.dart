@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 class GradeItem extends StatelessWidget {
   final String subject;
-  final int coef;
+  final int tri;
   final double grade;
 
   const GradeItem({
     super.key,
     required this.subject,
-    required this.coef,
+    required this.tri,
     required this.grade,
   });
 
@@ -46,7 +46,7 @@ class GradeItem extends StatelessWidget {
             Expanded(
               flex: 1,
               child: Text(
-                "$coef",
+                "$tri",
                 style: const TextStyle(fontSize: 14),
               ),
             ),

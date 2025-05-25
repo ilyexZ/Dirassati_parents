@@ -14,11 +14,9 @@ final studentsRemoteDataSourceProvider = Provider<StudentsRemoteDataSource>((ref
   return StudentsRemoteDataSource(dio: dio, storage: storage);
 });
 
-// FutureProvider.family to fetch notes by category and trimester.
-final notesProvider = FutureProvider.family<List<Note>, Map<String, String>>((ref, params) async {
-  final remoteDataSource = ref.watch(studentsRemoteDataSourceProvider);
-  final category = params['category']!;
-  final trimester = params['trimester']!;
-  return remoteDataSource.fetchNotes(category, trimester);
-});
 
+// In notes_provider.dart
+final studentNotesProvider = FutureProvider.family<List<Note>, String>((ref, studentId) async {
+  final remoteDataSource = ref.watch(studentsRemoteDataSourceProvider);
+  return remoteDataSource.fetchStudentNotes(studentId);
+});

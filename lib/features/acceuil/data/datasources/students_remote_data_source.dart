@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dirassati/core/shared_constants.dart';
 import 'package:dirassati/features/acceuil/data/models/note_model.dart';
+import 'package:dirassati/features/acceuil/data/staticnotes.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../models/student_model.dart';
@@ -78,18 +79,24 @@ class StudentsRemoteDataSource {
     ];
   }
   // New method to fetch notes for a given category.
-  Future<List<Note>> fetchNotes(String category, String trimester) async {
-    // Replace with your actual endpoint.
-    const endpoint = "https://api.example.com/notes";
-    final response = await dio.get(endpoint, queryParameters: {
-      'category': category,
-      'trimester': trimester,
-    });
-    if (response.statusCode == 200) {
-      final List data = response.data as List;
-      return data.map((json) => Note.fromJson(json)).toList();
-    } else {
-      throw Exception("Failed to load notes");
-    }
+  Future<List<Note>> fetchStudentNotes(String studentId) async {
+  final token = await storage.read(key: 'auth_token');
+
+  if (token == StudentsRemoteDataSource.debugToken || token == null) {
+    return _getDebugNotes();
   }
+
+  final response = await dio.get(
+    '/api/Notes/$studentId',
+    options: Options(headers: {'Authorization': 'Bearer $token'}),
+  );
+
+  final notesData = response.data['notes'] as List;
+  return notesData.map((json) => Note.fromJson(json)).toList();
+}
+
+List<Note> _getDebugNotes() {
+  return debugNotes;
+}
+
 }
