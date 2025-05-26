@@ -1,8 +1,9 @@
+// ./features/payments/presentation/providers/payments_provider.dart
+
+// Export all the domain providers - this is the single source of truth
 export '../../domain/providers/payments_provider.dart';
 
-// You can also add any presentation-specific providers here if needed
-// For example, UI state providers, form providers, etc.
-
+// Presentation-specific providers only
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Provider for managing payment form state

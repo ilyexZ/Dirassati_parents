@@ -1,6 +1,8 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dirassati/core/widgets/shimmer_student_card.dart';
+import 'package:dirassati/features/auth/domain/providers/auth_provider.dart';
+import 'package:dirassati/features/auth/presentation/pages/auth_wrapper.dart';
 import 'package:dirassati/features/school_info/domain/models/school_info_model.dart';
 import 'package:dirassati/features/school_info/presentation/pages/school_info_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,7 +23,7 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
     // Invalidate relevant providers
     ref.invalidate(studentsProvider);
     // Add other providers if needed: ref.invalidate(otherProvider);
-    
+
     // Allow some time for the refresh to complete
     await Future.delayed(const Duration(milliseconds: 300));
   }
@@ -80,8 +82,12 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
                     ),
                   ),
                 ),
+
+                // Add notification status widget to app bar
+
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   child: GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -92,12 +98,24 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
                     },
                     child: const Hero(
                       tag: "schoolP",
-                      child: Icon(CommunityMaterialIcons.school_outline, size: 32),
+                      child:
+                          Icon(CommunityMaterialIcons.school_outline, size: 32),
+                      //child: Image.asset("assets/logo.png"),
                     ),
                   ),
                 )
               ],
             ),
+            Row(children: [const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: NotificationStatusWidget(),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: () async {
+                    await ref.read(authStateProvider.notifier).logout();
+                  },
+                ),],),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _handleRefresh,

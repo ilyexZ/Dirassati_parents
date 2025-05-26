@@ -23,12 +23,13 @@ class PaymentDetailsPage extends ConsumerWidget {
     // Watch the payment info provider for reactive updates
     // This will automatically rebuild when data changes or updates
     final paymentInfoAsync = ref.watch(paymentInfoProvider(studentId));
-    
+
     // Watch currency formatter for consistent number formatting
     final formatCurrency = ref.watch(currencyFormatterProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Light background matching your design
+      backgroundColor:
+          const Color(0xFFF8FAFC), // Light background matching your design
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -53,54 +54,60 @@ class PaymentDetailsPage extends ConsumerWidget {
             valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6366F1)),
           ),
         ),
-        
+
         // Error state - show user-friendly error message with retry option
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red.shade300,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Erreur lors du chargement',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
+        error: (error, stack) {
+          // Check if it's a 404 error
+          final isNotFound = error.toString().contains('404');
+
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isNotFound ? Icons.info_outline : Icons.error_outline,
+                  size: 64,
+                  color: isNotFound ? Colors.grey : Colors.red.shade300,
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Impossible de charger les informations de paiement :${error}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  // Refresh the provider to retry loading
-                  ref.refresh(paymentInfoProvider(studentId));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6366F1),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 16),
+                Text(
+                  isNotFound
+                      ? 'Aucun paiement trouvé'
+                      : 'Erreur lors du chargement',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
                   ),
                 ),
-                child: const Text('Réessayer'),
-              ),
-            ],
-          ),
-        ),
-        
+                const SizedBox(height: 8),
+                Text(
+                  isNotFound
+                      ? 'Aucun paiement trouvé pour cet étudiant.'
+                      : 'Impossible de charger les informations de paiement : $error',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () => ref.refresh(paymentInfoProvider(studentId)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6366F1),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Réessayer'),
+                ),
+              ],
+            ),
+          );
+        },
+
         // Success state - display the payment information
         data: (paymentInfo) => CustomScrollView(
           slivers: [
@@ -110,7 +117,7 @@ class PaymentDetailsPage extends ConsumerWidget {
                 paymentDetails: paymentInfo.paymentDetails,
               ),
             ),
-            
+
             // Payment details card showing amounts and deadline
             SliverToBoxAdapter(
               child: PaymentDetailsCard(
@@ -118,7 +125,7 @@ class PaymentDetailsPage extends ConsumerWidget {
                 formatCurrency: formatCurrency,
               ),
             ),
-            
+
             // Wire transfers list showing payment history
             SliverToBoxAdapter(
               child: WireTransfersList(
@@ -126,7 +133,7 @@ class PaymentDetailsPage extends ConsumerWidget {
                 formatCurrency: formatCurrency,
               ),
             ),
-            
+
             // Add some bottom padding before the floating action button
             const SliverToBoxAdapter(
               child: SizedBox(height: 100),
@@ -134,7 +141,7 @@ class PaymentDetailsPage extends ConsumerWidget {
           ],
         ),
       ),
-      
+
       // Floating action button for making payments
       // This follows Material Design guidelines and your app's styling
       floatingActionButton: PaymentActionButton(
@@ -142,7 +149,7 @@ class PaymentDetailsPage extends ConsumerWidget {
         onPaymentSuccess: () {
           // Refresh payment data after successful payment
           ref.refresh(paymentInfoProvider(studentId));
-          
+
           // Show success message to user
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

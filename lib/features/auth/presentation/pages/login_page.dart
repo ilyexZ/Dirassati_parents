@@ -1,4 +1,5 @@
 import 'package:dirassati/core/auth_info_provider.dart';
+import 'package:dirassati/core/core_providers.dart';
 import 'package:dirassati/core/services/notification_service.dart';
 import 'package:dirassati/core/widgets/backend_ip_settings_screen.dart';
 import 'package:dirassati/features/acceuil/domain/providers/students_provider.dart';
@@ -108,12 +109,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         }
                       },
                       child: Text("Debug Login")),
-                  // ElevatedButton(
-                  //   onPressed: () {
-                  //     showStaticNotification();
-                  //   },
-                  //   child: const Text("Show Notification"),
-                  // ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final service = ref.read(notificationServiceProvider);
+                      await service.showAbsenceNotification(
+                        title: 'Test Notification',
+                        body: 'Testing if notifications work',
+                        payload: 'test',
+                      );
+                    },
+                    child: const Text("Show Notification"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      final urlLauncher = ref.read(urlLauncherProvider);
+                      urlLauncher.launchUrlInBrowser('https://www.google.com/');
+                    },
+                    child: const Text("Open Link"),
+                  ),
 
                   IconButton(
                     icon: const Icon(Icons.settings),

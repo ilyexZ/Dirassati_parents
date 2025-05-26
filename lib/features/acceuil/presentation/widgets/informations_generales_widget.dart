@@ -49,18 +49,18 @@ class InformationsGeneralesWidget extends StatelessWidget {
               label,
               style: const TextStyle(fontSize: 14,fontWeight: FontWeight.w500),
               
-              softWrap: true,
+              //softWrap: true,
             ),
             
           ),
           const SizedBox(width: 30),
           Expanded(
             flex: 4, // Give more space to the value
-            child: Text(
+            child: SelectableText(
               textAlign: TextAlign.start,
               value,
               style: const TextStyle(fontSize: 14,color: Color(0xFF393939),fontWeight: FontWeight.w400),
-              softWrap: true,
+              //softWrap: true,
             ),
           ),
         ],

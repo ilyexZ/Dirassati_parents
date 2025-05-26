@@ -70,6 +70,7 @@ class ProfileHeader extends StatelessWidget {
                   profile.occupation,
                   style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
+                
               ],
             ),
           ),

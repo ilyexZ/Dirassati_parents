@@ -58,7 +58,7 @@ class SchoolInfoPage extends ConsumerWidget {
           ),
         ),
         // When data is loaded successfully, show the school info
-        data: (schoolInfo) => SchoolInfoContent(schoolInfo: schoolInfo),
+        data: (schoolInfoAsync) => SchoolInfoContent(schoolInfo: schoolInfoAsync),
       ),
     );
   }

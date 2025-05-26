@@ -29,18 +29,19 @@ class NotificationService {
     );
 
     // Request notification permissions for Android 13+
-    //await _requestPermissions();
+    await _requestPermissions();
   }
 
-  // Future<void> _requestPermissions() async {
-  //   final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-  //       _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-  //           AndroidFlutterLocalNotificationsPlugin>();
+  Future<void> _requestPermissions() async {
+  final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+      _flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
 
-  //   if (androidImplementation != null) {
-  //     await androidImplementation.requestPermission();
-  //   }
-  // }
+  if (androidImplementation != null) {
+    final bool? granted = await androidImplementation.requestNotificationsPermission();
+    debugPrint('✅ Notification permission granted: $granted');
+  }
+}
 
   Future<void> showAbsenceNotification({
     required String title,

@@ -15,7 +15,7 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   int _currentIndex = 0;
   final PageController _pageController = PageController(keepPage: true);
-  final List<Widget> _pages = const [
+  final List<Widget> _pages =  [
     _KeepAliveWrapper(child: AcceuilPage()),
     _KeepAliveWrapper(child: NotificationsPage()),
     _KeepAliveWrapper(child: ProfilePage()),

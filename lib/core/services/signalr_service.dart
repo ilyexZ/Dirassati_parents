@@ -8,9 +8,10 @@ class SignalRService {
   HubConnection? _connection;
   late final String _hubUrl;
   String? _authToken;
-  
+
   SignalRService() {
-    _hubUrl = 'http://${BackendProvider.backendProviderIp}/parentNotificationHub';
+    _hubUrl =
+        'http://${BackendProvider.backendProviderIp}/parentNotificationHub';
   }
 
   bool get isConnected => _connection?.state == HubConnectionState.Connected;
@@ -35,11 +36,11 @@ class SignalRService {
 
       // Create the connection with proper authentication
       _connection = HubConnectionBuilder()
-          .withUrl(_hubUrl, 
-            transportType: HttpTransportType.WebSockets,
-            options: HttpConnectionOptions(
-              accessTokenFactory: () => Future.value(_authToken),
-            ))
+          .withUrl(_hubUrl,
+              options: HttpConnectionOptions(
+                transport: HttpTransportType.WebSockets, // ✅ Correct param
+                accessTokenFactory: () => Future.value(_authToken),
+              ))
           .withAutomaticReconnect(retryDelays: [2000, 5000, 10000, 30000])
           .configureLogging(Logger.root)
           .build();
@@ -60,7 +61,6 @@ class SignalRService {
       // Start the connection
       await _connection!.start();
       debugPrint('SignalR connection started successfully');
-      
     } catch (e) {
       debugPrint('Error starting SignalR connection: $e');
       rethrow;
@@ -68,7 +68,8 @@ class SignalRService {
   }
 
   // Register a callback for a specific hub method
-  void onNotificationReceived(String methodName, Function(List<dynamic>?) callback) {
+  void onNotificationReceived(
+      String methodName, Function(List<dynamic>?) callback) {
     if (_connection != null) {
       _connection!.on(methodName, callback);
       debugPrint('Registered handler for method: $methodName');

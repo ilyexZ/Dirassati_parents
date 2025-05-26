@@ -1,3 +1,5 @@
+// ./features/payments/data/datasources/payments_remote_data_source.dart
+
 import 'package:dio/dio.dart';
 import 'package:dirassati/core/shared_constants.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -6,10 +8,11 @@ import '../models/payment_model.dart';
 class PaymentsRemoteDataSource {
   final Dio dio;
   final FlutterSecureStorage storage;
-  
-  // Debug token for testing - following your pattern from students data source
-  static const String debugToken = "debug_payment_token";
-   String get backendUrl => BackendProvider.backendProviderIp;
+
+  // Debug token for testing - this should match what you use for login
+  static const String debugToken = "debug_dummy_token";
+
+  String get backendUrl => BackendProvider.backendProviderIp;
 
   PaymentsRemoteDataSource({
     required this.dio,
@@ -17,13 +20,19 @@ class PaymentsRemoteDataSource {
   });
 
   /// Fetch payment information for a specific student
-  /// This follows the same pattern as your other remote data sources
   Future<PaymentInfo> fetchPaymentInfo(String studentId) async {
     final token = await storage.read(key: 'auth_token');
-    
-    // Debug mode check - following your existing pattern
+
+    print('🔍 PaymentsRemoteDataSource: Token = $token');
+    print('🔍 PaymentsRemoteDataSource: Debug token = $debugToken');
+    print(
+        '🔍 PaymentsRemoteDataSource: Are they equal? ${token == debugToken}');
+
+    // Debug mode check - this should NOT happen here if we're handling it in the provider
     if (token == debugToken) {
-      return _getDebugPaymentInfo(studentId);
+      print(
+          '⚠️ PaymentsRemoteDataSource: Debug mode detected - this should be handled in provider!');
+      throw Exception('Debug mode should be handled in provider layer');
     }
 
     if (token == null) {
@@ -31,28 +40,43 @@ class PaymentsRemoteDataSource {
     }
 
     try {
+      print(
+          '🌐 PaymentsRemoteDataSource: Making API call to http://$backendUrl/api/Payments/student/$studentId/bills');
+
       final response = await dio.get(
         'http://$backendUrl/api/Payments/student/$studentId/bills',
         options: Options(
           headers: {
+            'accept': 'text/plain',
             'Authorization': 'Bearer $token',
-            'Content-Type': 'application/json',
           },
         ),
       );
 
+      print(
+          '📡 PaymentsRemoteDataSource: Response status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
+        print('✅ PaymentsRemoteDataSource: Success - parsing response');
         return PaymentInfo.fromJson(response.data);
       } else {
+        print(response);
         throw Exception('Failed to fetch payment info: ${response.statusCode}');
       }
     } on DioException catch (e) {
+      print('❌ PaymentsRemoteDataSource: DioException - ${e.message}');
+
+      // 👇 Add this to print the response body from server
+      if (e.response != null) {
+        print('📩 Error response status: ${e.response?.statusCode}');
+        print('📩 Error response body: ${e.response?.data}');
+      }
+
       throw Exception('Network error: ${e.message}');
     }
   }
 
   /// Submit a new payment/wire transfer
-  /// This would be called when user clicks "Effectuer un paiement"
   Future<bool> submitPayment({
     required String studentId,
     required String senderRip,
@@ -60,9 +84,11 @@ class PaymentsRemoteDataSource {
     required String expeditionDate,
   }) async {
     final token = await storage.read(key: 'auth_token');
-    
+
     if (token == debugToken) {
       // In debug mode, simulate successful payment
+      print(
+          '🐛 PaymentsRemoteDataSource: Simulating payment submission in debug mode');
       await Future.delayed(const Duration(seconds: 2));
       return true;
     }
@@ -73,7 +99,7 @@ class PaymentsRemoteDataSource {
 
     try {
       final response = await dio.post(
-        '/api/payments/submit',
+        'http://$backendUrl/api/payments/submit',
         data: {
           'studentId': studentId,
           'senderRip': senderRip,
@@ -92,31 +118,5 @@ class PaymentsRemoteDataSource {
     } on DioException catch (e) {
       throw Exception('Payment submission failed: ${e.message}');
     }
-  }
-
-  /// Debug data method - simulates API response for testing
-  /// This follows the same pattern as your school info debug data
-  PaymentInfo _getDebugPaymentInfo(String studentId) {
-    return PaymentInfo(
-      paymentDetails: PaymentDetails(
-        studentName: "Imad mohammed",
-        studentLevel: "3 ème année moyenne - m2",
-        studentImageUrl: "https://via.placeholder.com/60", // Placeholder image
-        amountToPay: 220000.0,
-        amountDeposited: 200000.0,
-        paymentDeadline: "06-06-2025",
-        studentId: studentId,
-      ),
-      wireTransfers: [
-        WireTransfer(
-          senderRip: "121212121212121221",
-          receiverRip: "121212121212121221",
-          expeditionDate: "25 Janvier 2025 - 9:12 Am",
-          amount: 120000.0,
-          transferId: "transfer_1",
-        ),
-        // You can add more sample transfers here
-      ],
-    );
   }
 }
