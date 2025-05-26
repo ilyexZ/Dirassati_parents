@@ -1,94 +1,75 @@
 // lib/features/notifications/domain/providers/notification_provider.dart
-import 'dart:convert';
-
-import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dirassati/core/services/notification_service.dart';
 import 'package:dirassati/core/services/signalr_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:convert';
 import 'package:intl/intl.dart';
-import '../models/real_time_absence.dart';
 
-final notificationInitProvider = FutureProvider<void>((ref) async {
-  final notificationService = ref.watch(notificationServiceProvider);
-  await notificationService.initialize();
-});
-
+// Your existing providers...
 final signalRServiceProvider = Provider((ref) => SignalRService());
+final notificationConnectionProvider = StateProvider<bool>((ref) => false);
 
 final notificationsProvider =
     StateNotifierProvider<NotificationNotifier, List<Map<String, String>>>(
         (ref) {
   final signalRService = ref.watch(signalRServiceProvider);
   final notificationService = ref.watch(notificationServiceProvider);
-  return NotificationNotifier(signalRService, notificationService,ref);
+  return NotificationNotifier(signalRService, notificationService, ref);
 });
-
-// Connection status provider to track SignalR connection
-final notificationConnectionProvider = StateProvider<bool>((ref) => false);
 
 class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
   final SignalRService _signalRService;
   final NotificationService _notificationService;
   final Ref _ref;
 
- NotificationNotifier(
+  NotificationNotifier(
     this._signalRService,
     this._notificationService,
     this._ref,
   ) : super([]) {
-    _registerNotificationHandlers();
+    debugPrint('🏗️ NotificationNotifier initialized');
   }
 
   void _registerNotificationHandlers() {
+    debugPrint('📝 Registering notification handlers...');
+    
     // Register handler for absence notifications
-    _signalRService.onNotificationReceived(
-      'ReceiveAbsenceNotification', // Must match hub method name
+    _signalRService.registerClientMethod(
+      'ReceiveAbsenceNotification',
       (args) async {
-        debugPrint('📩 RAW ABSENCE NOTIFICATION RECEIVED');
+        debugPrint('🔥 ABSENCE NOTIFICATION RECEIVED!');
         debugPrint('📩 Args type: ${args?.runtimeType}');
+        debugPrint('📩 Args length: ${args?.length}');
         debugPrint('📩 Args content: $args');
-
+        
         if (args != null && args.isNotEmpty) {
           debugPrint('📩 Processing absence notification...');
           try {
-            // Handle the notification data
             final notificationData = args[0];
-            debugPrint('Notification data type: ${notificationData.runtimeType}');
-            debugPrint('Notification data: $notificationData');
-
-            RealTimeAbsence? absence;
-
-            // Parse the data based on its type
+            debugPrint('📊 Notification data type: ${notificationData.runtimeType}');
+            debugPrint('📊 Notification data: $notificationData');
+            
+            Map<String, String> formattedNotification;
+            
             if (notificationData is Map<String, dynamic>) {
-              absence = RealTimeAbsence.fromJson(notificationData);
+              formattedNotification = _formatAbsenceNotificationFromHub(notificationData);
             } else if (notificationData is String) {
-              // If it's a JSON string, parse it first
               try {
-                final Map<String, dynamic> jsonData =
-                    json.decode(notificationData);
-                absence = RealTimeAbsence.fromJson(jsonData);
+                final Map<String, dynamic> jsonData = json.decode(notificationData);
+                formattedNotification = _formatAbsenceNotificationFromHub(jsonData);
               } catch (e) {
-                debugPrint('Error parsing JSON string: $e');
+                debugPrint('❌ Error parsing JSON string: $e');
                 return;
               }
             } else {
-              debugPrint('Unknown notification data type: ${notificationData.runtimeType}');
+              debugPrint('❌ Unknown notification data type: ${notificationData.runtimeType}');
               return;
             }
-
-            if (absence != null) {
-              // Format the notification for display
-              final formattedNotification = _formatAbsenceNotification(absence);
-
-              // Add to state (insert at beginning for newest first)
-              state = [formattedNotification, ...state];
-
-              // Show local notification
-              await _showLocalAbsenceNotification(absence);
-
-              debugPrint('✅ Successfully processed absence notification');
-            }
+            
+            state = [formattedNotification, ...state];
+            await _showLocalAbsenceNotificationFromHub(formattedNotification);
+            debugPrint('✅ Successfully processed absence notification');
           } catch (e) {
             debugPrint('❌ Error processing absence notification: $e');
           }
@@ -98,80 +79,214 @@ class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
       },
     );
 
-    // Register handler for convocation notifications
-    _signalRService.onNotificationReceived(
-      'ReceiveConvocationNotification',
+    // Register handler for student report notifications
+    _signalRService.registerClientMethod(
+      'ReceiveNewReport',
       (args) async {
-        debugPrint('📩 RAW CONVOCATION NOTIFICATION RECEIVED');
+        debugPrint('🔥 STUDENT REPORT NOTIFICATION RECEIVED!');
         debugPrint('📩 Args content: $args');
         
         if (args != null && args.isNotEmpty) {
           try {
             final notificationData = args[0];
-            
-            // Process convocation data (adjust based on your convocation model)
             Map<String, String> formattedNotification;
             
             if (notificationData is Map<String, dynamic>) {
-              formattedNotification = _formatConvocationNotification(notificationData);
+              formattedNotification = _formatReportNotification(notificationData);
             } else if (notificationData is String) {
               final Map<String, dynamic> jsonData = json.decode(notificationData);
-              formattedNotification = _formatConvocationNotification(jsonData);
+              formattedNotification = _formatReportNotification(jsonData);
             } else {
-              debugPrint('Unknown convocation data type: ${notificationData.runtimeType}');
+              debugPrint('❌ Unknown report data type: ${notificationData.runtimeType}');
               return;
             }
-
-            // Add to state
+            
             state = [formattedNotification, ...state];
-
-            // Show local notification
-            await _showLocalConvocationNotification(formattedNotification);
-
-            debugPrint('✅ Successfully processed convocation notification');
+            await _showLocalReportNotification(formattedNotification);
+            debugPrint('✅ Successfully processed report notification');
           } catch (e) {
-            debugPrint('❌ Error processing convocation notification: $e');
+            debugPrint('❌ Error processing report notification: $e');
           }
         }
       },
     );
+
+    // Register handler for bill notifications
+    _signalRService.registerClientMethod(
+      'ReceivePendingBillNotification',
+      (args) async {
+        debugPrint('🔥 BILL NOTIFICATION RECEIVED!');
+        debugPrint('📩 Args content: $args');
+        
+        if (args != null && args.isNotEmpty) {
+          try {
+            final notificationData = args[0];
+            if (notificationData is List) {
+              // Handle multiple bills
+              for (var bill in notificationData) {
+                if (bill is Map<String, dynamic>) {
+                  final formattedNotification = _formatBillNotification(bill);
+                  state = [formattedNotification, ...state];
+                  await _showLocalBillNotification(formattedNotification);
+                }
+              }
+            } else if (notificationData is Map<String, dynamic>) {
+              // Handle single bill
+              final formattedNotification = _formatBillNotification(notificationData);
+              state = [formattedNotification, ...state];
+              await _showLocalBillNotification(formattedNotification);
+            }
+            debugPrint('✅ Successfully processed bill notification(s)');
+          } catch (e) {
+            debugPrint('❌ Error processing bill notification: $e');
+          }
+        }
+      },
+    );_signalRService.registerClientMethod(
+      'ReceiveNewStudentBill',
+      (args) async {
+        debugPrint('🔥 NEW BILL NOTIFICATION RECEIVED!');
+        debugPrint('📩 Args content: $args');
+        
+        if (args != null && args.isNotEmpty) {
+          try {
+            final notificationData = args[0];
+            if (notificationData is List) {
+              // Handle multiple bills
+              for (var bill in notificationData) {
+                if (bill is Map<String, dynamic>) {
+                  final formattedNotification = _formatNewBillNotification(bill);
+                  state = [formattedNotification, ...state];
+                  await _showLocalNewBillNotification(formattedNotification);
+                }
+              }
+            } else if (notificationData is Map<String, dynamic>) {
+              // Handle single bill
+              final formattedNotification = _formatBillNotification(notificationData);
+              state = [formattedNotification, ...state];
+              await _showLocalBillNotification(formattedNotification);
+            }
+            debugPrint('✅ Successfully processed bill notification(s)');
+          } catch (e) {
+            debugPrint('❌ Error processing bill notification: $e');
+          }
+        }
+      },
+    );
+
+    // Register handler for broadcast notifications
+    _signalRService.registerClientMethod(
+      'ReceiveBroadcastNotification',
+      (args) async {
+        debugPrint('🔥 BROADCAST NOTIFICATION RECEIVED!');
+        debugPrint('📩 Args content: $args');
+        
+        if (args != null && args.isNotEmpty) {
+          try {
+            final message = args[0]?.toString() ?? 'Broadcast message';
+            final formattedNotification = _formatBroadcastNotification(message);
+            state = [formattedNotification, ...state];
+            await _showLocalGeneralNotification(formattedNotification);
+            debugPrint('✅ Successfully processed broadcast notification');
+          } catch (e) {
+            debugPrint('❌ Error processing broadcast notification: $e');
+          }
+        }
+      },
+    );
+
+    debugPrint('✅ All notification handlers registered');
   }
 
-  Map<String, String> _formatAbsenceNotification(RealTimeAbsence absence) {
-    final formattedDate = _formatDate(absence.dateTime);
-    final studentName = absence.student != null
-        ? '${absence.student!.firstName} ${absence.student!.lastName}'
-        : 'Student Unknown';
-
-    return {
-      'id': absence.absenceId,
-      'type': 'absence',
-      'title': 'Notification d\'absence',
-      'subtitle': absence.isJustified ? 'absence justifiée' : 'absence injustifiée',
-      'child': studentName,
-      'description': absence.isJustified
-          ? 'Votre enfant a été absent avec justificatif.'
-          : 'Votre enfant a été absent sans justificatif.',
-      'date': formattedDate,
-      'remark': absence.remark ?? '',
-    };
+  // Method to connect to SignalR when user logs in
+  Future<void> connect(String authToken) async {
+    try {
+      debugPrint('🔄 Connecting to SignalR with token: ${authToken.substring(0, 20)}...');
+      
+      // Set auth token first
+      _signalRService.setAuthToken(authToken);
+      
+      // Register handlers BEFORE starting connection
+      _registerNotificationHandlers();
+      
+      // Start connection (this will now automatically register the pending methods)
+      await _signalRService.startConnection();
+      
+      // Update connection status
+      _ref.read(notificationConnectionProvider.notifier).state = true;
+      
+      debugPrint('✅ SignalR connection established and handlers registered');
+    } catch (e) {
+      debugPrint('❌ SignalR connection failed: $e');
+      _ref.read(notificationConnectionProvider.notifier).state = false;
+      rethrow;
+    }
   }
 
-  Map<String, String> _formatConvocationNotification(Map<String, dynamic> data) {
-    // Adjust this based on your convocation data structure
-    final formattedDate = data['dateTime'] != null 
-        ? _formatDate(DateTime.parse(data['dateTime'])) 
+  // Your existing formatting methods remain the same...
+  Map<String, String> _formatAbsenceNotificationFromHub(Map<String, dynamic> data) {
+    final formattedDate = data['date'] != null 
+        ? _formatDate(DateTime.parse(data['date'])) 
         : _formatDate(DateTime.now());
     
     return {
-      'id': data['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      'type': 'convocation',
-      'title': data['title']?.toString() ?? 'Convocation',
-      'subtitle': data['subtitle']?.toString() ?? 'Nouvelle convocation',
-      'child': data['studentName']?.toString() ?? 'Votre enfant',
-      'description': data['description']?.toString() ?? 'Vous avez reçu une nouvelle convocation.',
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'type': 'absence',
+      'title': 'Notification d\'absence',
+      'subtitle': 'absence injustifiée',
+      'child': data['studentName']?.toString() ?? 'Student Unknown',
+      'description': 'Votre enfant ${data['studentName'] ?? ''} a été absent.',
       'date': formattedDate,
-      'remark': data['remark']?.toString() ?? '',
+      'remark': '',
+    };
+  }
+
+  Map<String, String> _formatReportNotification(Map<String, dynamic> data) {
+    final formattedDate = _formatDate(DateTime.now());
+    final teacherName = data['teacher'] != null 
+        ? '${data['teacher']['firstName'] ?? ''} ${data['teacher']['lastName'] ?? ''}'.trim()
+        : 'Teacher';
+    
+    return {
+      'id': data['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      'type': 'report',
+      'title': 'Nouveau rapport',
+      'subtitle': 'rapport étudiant',
+      'child': data['studentName']?.toString() ?? 'Votre enfant',
+      'description': 'Un nouveau rapport a été publié par $teacherName.',
+      'date': formattedDate,
+      'remark': data['description']?.toString() ?? '',
+    };
+  }
+
+  Map<String, String> _formatBillNotification(Map<String, dynamic> data) {
+    final formattedDate = _formatDate(DateTime.now());
+    final amount = data['amount']?.toString() ?? '0';
+    
+    return {
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'type': 'bill',
+      'title': data['title']?.toString() ?? 'Nouvelle facture',
+      'subtitle': 'facture école',
+      'child': 'Montant: $amount',
+      'description': data['description']?.toString() ?? 'Une nouvelle facture a été ajoutée.',
+      'date': formattedDate,
+      'remark': '',
+    };
+  }
+
+  Map<String, String> _formatBroadcastNotification(String message) {
+    final formattedDate = _formatDate(DateTime.now());
+    
+    return {
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'type': 'broadcast',
+      'title': 'Annonce générale',
+      'subtitle': 'message école',
+      'child': '',
+      'description': message,
+      'date': formattedDate,
+      'remark': '',
     };
   }
 
@@ -181,59 +296,91 @@ class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
       return formatter.format(dateTime);
     } catch (e) {
       debugPrint('Error formatting date: $e');
-      // Fallback to simple format
       return '${dateTime.day}/${dateTime.month}/${dateTime.year} - ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
     }
   }
+  Map<String, String> _formatNewBillNotification(Map<String, dynamic> data) {
+    final formattedDate = _formatDate(DateTime.now());
+    final amount = data['Amount']?.toString() ?? '0';
+    
+    return {
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'type': 'bill',
+      'title': data['Title']?.toString() ?? 'Nouvelle facture',
+      'subtitle': 'facture école',
+      'child': 'Montant: $amount',
+      'description': data['Description']?.toString() ?? 'Une nouvelle facture a été ajoutée.',
+      'date': formattedDate,
+      'remark': '',
+    };
+  }
 
-  Future<void> _showLocalAbsenceNotification(RealTimeAbsence absence) async {
+  // Your existing notification methods remain the same...
+  Future<void> _showLocalAbsenceNotificationFromHub(Map<String, String> data) async {
     try {
-      final studentName = absence.student != null
-          ? '${absence.student!.firstName} ${absence.student!.lastName}'
-          : 'Votre enfant';
-
-      final title = absence.isJustified ? 'Absence justifiée' : 'Absence injustifiée';
-      final body = absence.isJustified
-          ? '$studentName a été absent(e) avec justificatif'
-          : '$studentName a été absent(e) sans justificatif';
-
       await _notificationService.showAbsenceNotification(
-        title: title,
-        body: body,
-        payload: absence.absenceId,
+        title: data['title'] ?? 'Absence',
+        body: data['description'] ?? 'Nouvelle absence',
+        payload: data['id'],
       );
     } catch (e) {
       debugPrint('❌ Error showing local absence notification: $e');
     }
   }
 
-  Future<void> _showLocalConvocationNotification(Map<String, String> data) async {
+  Future<void> _showLocalReportNotification(Map<String, String> data) async {
     try {
-      await _notificationService.showConvocationNotification(
-        title: data['title'] ?? 'Convocation',
-        body: data['description'] ?? 'Nouvelle convocation reçue',
+      await _notificationService.showGeneralNotification(
+        title: data['title'] ?? 'Nouveau rapport',
+        body: data['description'] ?? 'Un nouveau rapport a été publié',
         payload: data['id'],
+        channelId: 'report_channel_id',
+        channelName: 'Report Notifications',
+        channelDescription: 'Notifications for student reports',
       );
     } catch (e) {
-      debugPrint('❌ Error showing local convocation notification: $e');
+      debugPrint('❌ Error showing local report notification: $e');
     }
   }
 
-  // Method to connect to SignalR when user logs in
-  Future<void> connect(String authToken) async {
+  Future<void> _showLocalBillNotification(Map<String, String> data) async {
     try {
-      debugPrint('🔄 Connecting to SignalR...');
-      _signalRService.setAuthToken(authToken);
-      await _signalRService.startConnection();
-      
-      // Update connection status
-      _ref.read(notificationConnectionProvider.notifier).state = true;
-      
-      debugPrint('✅ SignalR connection established successfully');
+      await _notificationService.showGeneralNotification(
+        title: data['title'] ?? 'Nouvelle facture',
+        body: data['description'] ?? 'Une nouvelle facture a été ajoutée',
+        payload: data['id'],
+        channelId: 'bill_channel_id',
+        channelName: 'Bill Notifications',
+        channelDescription: 'Notifications for school bills',
+      );
     } catch (e) {
-      debugPrint('❌ SignalR connection failed: $e');
-      _ref.read(notificationConnectionProvider.notifier).state = false;
-      rethrow;
+      debugPrint('❌ Error showing local bill notification: $e');
+    }
+  }
+  Future<void> _showLocalNewBillNotification(Map<String, String> data) async {
+    try {
+      await _notificationService.showGeneralNotification(
+        title: data['Title'] ?? 'Nouvelle facture',
+        body: data['Description'] ?? 'Une nouvelle facture a été ajoutée',
+        payload: data['BillId'],
+        channelId: 'bill_channel_id',
+        channelName: 'Bill Notifications',
+        channelDescription: 'Notifications for school bills',
+      );
+    } catch (e) {
+      debugPrint('❌ Error showing local bill notification: $e');
+    }
+  }
+
+  Future<void> _showLocalGeneralNotification(Map<String, String> data) async {
+    try {
+      await _notificationService.showGeneralNotification(
+        title: data['title'] ?? 'Annonce',
+        body: data['description'] ?? 'Nouvelle annonce',
+        payload: data['id'],
+      );
+    } catch (e) {
+      debugPrint('❌ Error showing local general notification: $e');
     }
   }
 
@@ -262,11 +409,20 @@ class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
     debugPrint('🗑️ Notification $notificationId removed');
   }
 
-  // Method to mark notification as read (if needed)
-  void markAsRead(String notificationId) {
-    // Note: Since we're using Map<String, String>, we can't add 'isRead' field
-    // You might want to create a separate provider for read status
-    debugPrint('📖 Notification $notificationId marked as read');
+  // Method to test connection by adding a fake notification
+  void addTestNotification() {
+    final testNotification = {
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'type': 'test',
+      'title': 'Test Notification',
+      'subtitle': 'This is a test',
+      'child': 'Test Student',
+      'description': 'This is a test notification to verify the system is working.',
+      'date': _formatDate(DateTime.now()),
+      'remark': 'Test remark',
+    };
+    state = [testNotification, ...state];
+    debugPrint('🧪 Test notification added');
   }
 
   // Get connection status

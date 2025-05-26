@@ -89,7 +89,7 @@ class SchoolInfoContent extends StatelessWidget {
                 child: Hero(
                   tag: 'schoolP',
                   child:
-                      Icon(Icons.school_outlined, size: 160, color: iconColor),
+                      SizedBox(height: 160, width: 160, child: Image.asset("assets/img/logo.png")),
                 ),
               )),
 

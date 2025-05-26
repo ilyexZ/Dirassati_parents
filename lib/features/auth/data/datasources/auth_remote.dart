@@ -14,29 +14,58 @@ String get backendUrl => BackendProvider.backendProviderIp;
   AuthRemoteDataSource(this.dio);
 
   Future<UserModel> login(String email, String password) async {
-    debugPrint("$email $password");
-    final response = await dio.post(
-      'http://$backendUrl/api/parent/auth/login',
-      data: {
-        'email': email,
-        'password': password,
-      },
-    );
-    debugPrint("Response data: ${response.data}"); // Debug print
+  debugPrint("$email $password");
+  clog("r", backendUrl);
 
-    if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
-      final data = response.data as Map<String, dynamic>;
-      if (data.containsKey('token') &&
-          data.containsKey('firstName') &&
-          data.containsKey('lastName')) {
-        return UserModel.fromJson(data);
-      } else {
-        throw Exception("Missing required fields in response: $data");
-      }
+  final data = {
+    'email': email,
+    'password': password,
+  };
+
+  final response = await dio.post(
+    'http://$backendUrl/api/parent/auth/login',
+    data: data,
+    options: Options(
+      followRedirects: false, // We will handle 307 manually
+      validateStatus: (status) => status != null && status < 400,
+    ),
+  );
+
+  // Handle 307 Temporary Redirect manually
+  if (response.statusCode == 307) {
+    final redirectedUrl = response.headers.value('location');
+    if (redirectedUrl != null) {
+      final redirectedResponse = await dio.post(
+        redirectedUrl,
+        data: data,
+      );
+      return _parseLoginResponse(redirectedResponse);
     } else {
-      throw Exception("Login failed");
+      throw Exception("Redirected, but no Location header found.");
     }
   }
+
+  return _parseLoginResponse(response);
+}
+
+// Helper to parse the login response
+UserModel _parseLoginResponse(Response response) {
+  debugPrint("Response data: ${response.data}");
+
+  if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+    final data = response.data as Map<String, dynamic>;
+    if (data.containsKey('token') &&
+        data.containsKey('firstName') &&
+        data.containsKey('lastName')) {
+      return UserModel.fromJson(data);
+    } else {
+      throw Exception("Missing required fields in response: $data");
+    }
+  } else {
+    throw Exception("Login failed with status ${response.statusCode}");
+  }
+}
+
   // New method for changing password.
   // Future<void> changePassword(String currentPassword, String newPassword) async {
   // final response = await dio.post(

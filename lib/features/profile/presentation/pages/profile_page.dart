@@ -27,16 +27,7 @@ class ProfilePage extends ConsumerWidget {
               "Profile",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
-            IconButton(
-                onPressed: () async {
-                  // Invalidate & re-fetch the profile
-                  ref.invalidate(profileProvider);
-                  ref.invalidate(authInfoProvider);
-                  ref.invalidate(parentIdProvider);
-                  ref.invalidate(studentsProvider);
-                  await Future.delayed(const Duration(milliseconds: 300));
-                },
-                icon: Icon(Icons.refresh))
+           
           ],
         ),
         backgroundColor: Colors.white,

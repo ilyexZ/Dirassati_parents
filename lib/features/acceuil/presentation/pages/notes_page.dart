@@ -93,13 +93,13 @@ class NotesPage extends ConsumerWidget {
                   // On error, log and still show filtered debug notes
                   return Column(
                     children: [
-                      // Padding(
-                      //   padding: const EdgeInsets.all(16.0),
-                      //   child: Text(
-                      //     'Error loading notes: \$e. Showing debug notes.',
-                      //     style: const TextStyle(color: Colors.red),
-                      //   ),
-                      // ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          'Error loading notes: $e. Showing debug notes.',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
                       Expanded(
                         child: _buildNotesContent(
                           context,

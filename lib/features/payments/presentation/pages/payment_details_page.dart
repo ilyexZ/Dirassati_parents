@@ -82,9 +82,10 @@ class PaymentDetailsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  isNotFound
-                      ? 'Aucun paiement trouvé pour cet étudiant.'
-                      : 'Impossible de charger les informations de paiement : $error',
+                  //isNotFound ?
+                       'Aucun paiement trouvé pour cet étudiant.'
+                      // : 'Impossible de charger les informations de paiement : $error'
+                      ,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade600,
@@ -127,12 +128,12 @@ class PaymentDetailsPage extends ConsumerWidget {
             ),
 
             // Wire transfers list showing payment history
-            SliverToBoxAdapter(
-              child: WireTransfersList(
-                wireTransfers: paymentInfo.wireTransfers,
-                formatCurrency: formatCurrency,
-              ),
-            ),
+            // SliverToBoxAdapter(
+            //   child: WireTransfersList(
+            //     wireTransfers: paymentInfo.wireTransfers,
+            //     formatCurrency: formatCurrency,
+            //   ),
+            // ),
 
             // Add some bottom padding before the floating action button
             const SliverToBoxAdapter(

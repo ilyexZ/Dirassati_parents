@@ -41,60 +41,100 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: BackgroundShapes(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Authentifiez à vorte compte",
-                    style: TextStyle(color: Color(0xFF393939)),
-                  ),
-                  SizedBox(
-                    height: 35,
-                  ),
+          child: Stack(
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Authentifiez à vorte compte",
+                        style: TextStyle(color: Color(0xFF393939)),
+                      ),
+                      SizedBox(
+                        height: 35,
+                      ),
 
-                  EmailField(controller: emailController),
-                  const SizedBox(height: 20),
-                  PasswordField(controller: passwordController),
-                  const SizedBox(height: 5),
-                  const ForgotPassword(),
-                  const SizedBox(height: 40),
-                  LoginButton(
-                    onPressed: () async {
-                      try {
-                        FocusScope.of(context).unfocus();
-                        await authNotifier.login(
-                          emailController.text,
-                          passwordController.text,
-                        );
-                        // Invalidate providers to fetch fresh data
-                        ref.invalidate(authInfoProvider);
-                        ref.invalidate(parentIdProvider);
-                        ref.invalidate(profileProvider);
-                        ref.invalidate(studentsProvider);
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            behavior: SnackBarBehavior.floating,
-                            margin: const EdgeInsets.only(
-                                top: 20, left: 20, right: 20),
-                            content:
-                                const Text("Login failed: Invalid credentials"),
-                            backgroundColor: Colors.red,
+                      EmailField(controller: emailController),
+                      const SizedBox(height: 20),
+                      PasswordField(controller: passwordController),
+                      const SizedBox(height: 5),
+                      const ForgotPassword(),
+                      const SizedBox(height: 40),
+                      LoginButton(
+                        onPressed: () async {
+                          try {
+                            FocusScope.of(context).unfocus();
+                            await authNotifier.login(
+                              emailController.text,
+                              passwordController.text,
+                            );
+                            // Invalidate providers to fetch fresh data
+                            // ref.invalidate(authInfoProvider);
+                            // ref.invalidate(parentIdProvider);
+                            // ref.invalidate(profileProvider);
+                            // ref.invalidate(studentsProvider);
+                          } catch (e) {
+                            ref.invalidate(authInfoProvider);
+                            ref.invalidate(parentIdProvider);
+                            ref.invalidate(profileProvider);
+                            ref.invalidate(studentsProvider);
+                          }
+                        },
+                      ),
+
+                      // Debug Login Button for testing:
+
+                      // ElevatedButton(
+                      //   onPressed: () async {
+                      //     final service = ref.read(notificationServiceProvider);
+                      //     await service.showAbsenceNotification(
+                      //       title: 'Test Notification',
+                      //       body: 'Testing if notifications work',
+                      //       payload: 'test',
+                      //     );
+                      //   },
+                      //   child: const Text("Show Notification"),
+                      // ),
+                      // TextButton(
+                      //   onPressed: () {
+                      //     final urlLauncher = ref.read(urlLauncherProvider);
+                      //     urlLauncher.launchUrlInBrowser('https://www.google.com/');
+                      //   },
+                      //   child: const Text("Open Link"),
+                      // ),
+
+                      //const SizedBox(height: 100),
+                      const SizedBox(height: 100),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 8,
+                top: 32,
+                child: Column(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      tooltip: 'Backend Settings',
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const BackendIpSettingsScreen(),
                           ),
                         );
-                      }
-                    },
-                  ),
-                  // Debug Login Button for testing:
-                  ElevatedButton(
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.login),
                       onPressed: () async {
                         try {
                           FocusScope.of(context).unfocus();
                           await authNotifier.debugLogin();
-                          // Invalidate providers to fetch fresh data
                           ref.invalidate(authInfoProvider);
                           ref.invalidate(parentIdProvider);
                           ref.invalidate(profileProvider);
@@ -108,41 +148,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           );
                         }
                       },
-                      child: Text("Debug Login")),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final service = ref.read(notificationServiceProvider);
-                      await service.showAbsenceNotification(
-                        title: 'Test Notification',
-                        body: 'Testing if notifications work',
-                        payload: 'test',
-                      );
-                    },
-                    child: const Text("Show Notification"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      final urlLauncher = ref.read(urlLauncherProvider);
-                      urlLauncher.launchUrlInBrowser('https://www.google.com/');
-                    },
-                    child: const Text("Open Link"),
-                  ),
-
-                  IconButton(
-                    icon: const Icon(Icons.settings),
-                    tooltip: 'Backend Settings',
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const BackendIpSettingsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 100),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
