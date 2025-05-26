@@ -1,9 +1,11 @@
+import 'package:dirassati/core/widgets/full_screen_avatar.dart';
 import 'package:dirassati/features/profile/domain/entity/profile.dart';
 import 'package:flutter/material.dart';
 
 class ProfileHeader extends StatelessWidget {
   final Profile profile;
   const ProfileHeader({super.key, required this.profile});
+  static final tempImage = AssetImage("assets/img/pfp.png");
 
   @override
   Widget build(BuildContext context) {
@@ -22,10 +24,32 @@ class ProfileHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 30,
-            // You might later change this to load a user image from profile data.
-            backgroundImage: NetworkImage("https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250"),
+          Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      opaque: false, // Makes the route non-opaque.
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          FullScreenAvatar(
+                        tag: 'profileP',
+                        child: Image(image: tempImage),
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: 'profileP',
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundImage: tempImage,
+                    backgroundColor: Colors.transparent,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(width: 12),
           Expanded(

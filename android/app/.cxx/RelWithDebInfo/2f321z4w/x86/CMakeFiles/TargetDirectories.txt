@@ -1,0 +1,2 @@
+/media/ilyes/extraMint/projects/dirassati/android/app/.cxx/RelWithDebInfo/2f321z4w/x86/CMakeFiles/edit_cache.dir
+/media/ilyes/extraMint/projects/dirassati/android/app/.cxx/RelWithDebInfo/2f321z4w/x86/CMakeFiles/rebuild_cache.dir

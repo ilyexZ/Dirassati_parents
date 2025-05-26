@@ -17,24 +17,13 @@ class AcceuilPage extends ConsumerStatefulWidget {
 }
 
 class _AcceuilPageState extends ConsumerState<AcceuilPage> {
-  bool _isRefreshing = false;
-
   Future<void> _handleRefresh() async {
-    // Set refresh state to show shimmer placeholders
-    setState(() {
-      _isRefreshing = true;
-    });
-
-    // Force a new fetch; this returns a Future that completes when the new data is ready
-    await ref.refresh(studentsProvider.future);
-
-    // Optionally delay to make the loading state clearly visible
+    // Invalidate relevant providers
+    ref.invalidate(studentsProvider);
+    // Add other providers if needed: ref.invalidate(otherProvider);
+    
+    // Allow some time for the refresh to complete
     await Future.delayed(const Duration(milliseconds: 300));
-
-    // Remove the refresh flag once data is reloaded
-    setState(() {
-      _isRefreshing = false;
-    });
   }
 
   @override
@@ -43,7 +32,7 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xffEDEFFF),
+        backgroundColor: const Color(0xffEDEFFF),
         surfaceTintColor: Colors.transparent,
         title: Center(
           child: Image.asset(
@@ -53,7 +42,7 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
           ),
         ),
       ),
-      backgroundColor: Color(0xffEDEFFF),
+      backgroundColor: const Color(0xffEDEFFF),
       body: Container(
         margin: const EdgeInsets.only(top: 8),
         decoration: BoxDecoration(
@@ -92,16 +81,19 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 32,vertical: 16),
+                  margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   child: GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => SchoolInfoPage()),
+                            builder: (context) => const SchoolInfoPage()),
                       );
                     },
-                    child: Icon(CommunityMaterialIcons.school_outline,size: 32,),
+                    child: const Hero(
+                      tag: "schoolP",
+                      child: Icon(CommunityMaterialIcons.school_outline, size: 32),
+                    ),
                   ),
                 )
               ],
@@ -109,35 +101,25 @@ class _AcceuilPageState extends ConsumerState<AcceuilPage> {
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _handleRefresh,
-                child: _isRefreshing
-                    // When refreshing, show shimmer placeholders
-                    ? ListView.builder(
-                        itemCount: 6,
-                        itemBuilder: (context, index) {
-                          return const ShimmerStudentCard();
-                        },
-                      )
-                    // Otherwise, use the existing AsyncValue state
-                    : studentsAsyncValue.when(
-                        data: (students) => ListView.builder(
-                          addAutomaticKeepAlives: false,
-                          itemCount: students.length,
-                          itemBuilder: (context, index) {
-                            final student = students[index];
-                            //clog("y", student);
-                            return StudentCard(student: student);
-                          },
-                        ),
-                        loading: () => ListView.builder(
-                          itemCount:
-                              6, // Number of shimmer placeholders for initial load
-                          itemBuilder: (context, index) {
-                            return const ShimmerStudentCard();
-                          },
-                        ),
-                        error: (error, stackTrace) =>
-                            Center(child: Text("Error: $error")),
-                      ),
+                child: studentsAsyncValue.when(
+                  data: (students) => ListView.builder(
+                    addAutomaticKeepAlives: false,
+                    itemCount: students.length,
+                    itemBuilder: (context, index) {
+                      final student = students[index];
+                      return StudentCard(student: student);
+                    },
+                  ),
+                  loading: () => ListView.builder(
+                    itemCount: 6,
+                    itemBuilder: (context, index) {
+                      return const ShimmerStudentCard();
+                    },
+                  ),
+                  error: (error, stackTrace) => Center(
+                    child: Text("Error: ${error.toString()}"),
+                  ),
+                ),
               ),
             ),
           ],

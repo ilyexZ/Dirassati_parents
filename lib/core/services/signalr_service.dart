@@ -1,16 +1,18 @@
 // lib/core/services/signalr_service.dart
-
-import 'package:dirassati/core/shared_constants.dart';
+import 'package:flutter/foundation.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import 'package:logging/logging.dart';
-import 'package:flutter/foundation.dart';
+import '../shared_constants.dart';
 
-  String get backendUrl => BackendProvider.backendProviderIp;
 class SignalRService {
   HubConnection? _connection;
-  final String _hubUrl = 'http://{$backendUrl}/parentNotificationHub';
+  late final String _hubUrl;
   String? _authToken;
   
+  SignalRService() {
+    _hubUrl = 'http://${BackendProvider.backendProviderIp}/parentNotificationHub';
+  }
+
   bool get isConnected => _connection?.state == HubConnectionState.Connected;
 
   // Set the auth token when the user logs in
@@ -23,28 +25,42 @@ class SignalRService {
     if (_authToken == null) {
       throw Exception('Authentication token is required');
     }
-    
+
     try {
       // Configure logging
       Logger.root.level = Level.ALL;
       Logger.root.onRecord.listen((LogRecord rec) {
         debugPrint('SignalR: ${rec.level.name}: ${rec.message}');
       });
-      
-      // Create HTTP connection options
-      final httpOptions = HttpConnectionOptions(
-        accessTokenFactory: () => Future.value(_authToken),
-      );
-      
-      // Create the connection
+
+      // Create the connection with proper authentication
       _connection = HubConnectionBuilder()
-          .withUrl(_hubUrl, options: httpOptions)
-          .withAutomaticReconnect()
+          .withUrl(_hubUrl, 
+            transportType: HttpTransportType.WebSockets,
+            options: HttpConnectionOptions(
+              accessTokenFactory: () => Future.value(_authToken),
+            ))
+          .withAutomaticReconnect(retryDelays: [2000, 5000, 10000, 30000])
+          .configureLogging(Logger.root)
           .build();
+
+      // Add connection state handlers
+      // _connection!.onclose((error) {
+      //   debugPrint('SignalR connection closed: $error');
+      // });
+
+      // _connection!.onreconnecting((error) {
+      //   debugPrint('SignalR reconnecting: $error');
+      // });
+
+      // _connection!.onreconnected((connectionId) {
+      //   debugPrint('SignalR reconnected with ID: $connectionId');
+      // });
 
       // Start the connection
       await _connection!.start();
-      debugPrint('SignalR connection started');
+      debugPrint('SignalR connection started successfully');
+      
     } catch (e) {
       debugPrint('Error starting SignalR connection: $e');
       rethrow;
@@ -53,7 +69,12 @@ class SignalRService {
 
   // Register a callback for a specific hub method
   void onNotificationReceived(String methodName, Function(List<dynamic>?) callback) {
-    _connection?.on(methodName, callback);
+    if (_connection != null) {
+      _connection!.on(methodName, callback);
+      debugPrint('Registered handler for method: $methodName');
+    } else {
+      debugPrint('Cannot register handler: connection is null');
+    }
   }
 
   // Stop the connection
@@ -61,6 +82,12 @@ class SignalRService {
     if (_connection != null) {
       await _connection!.stop();
       debugPrint('SignalR connection stopped');
+      _connection = null;
     }
+  }
+
+  // Dispose method to clean up resources
+  void dispose() {
+    stopConnection();
   }
 }

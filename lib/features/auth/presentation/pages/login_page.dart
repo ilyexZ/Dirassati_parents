@@ -108,12 +108,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         }
                       },
                       child: Text("Debug Login")),
-                  ElevatedButton(
-                    onPressed: () {
-                      showStaticNotification();
-                    },
-                    child: const Text("Show Notification"),
-                  ),
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     showStaticNotification();
+                  //   },
+                  //   child: const Text("Show Notification"),
+                  // ),
 
                   IconButton(
                     icon: const Icon(Icons.settings),

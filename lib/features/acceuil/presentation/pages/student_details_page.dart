@@ -50,7 +50,7 @@ class StudentDetailsPage extends StatelessWidget {
                     children: [
                       ProfileHeaderWidget(student: student),
                       InformationsGeneralesWidget(student: student),
-                      ActivitesWidget(),
+                      ActivitesWidget(student: student,),
                     ],
                   ),
                 ),

@@ -87,7 +87,7 @@ class StudentsRemoteDataSource {
   }
 
   final response = await dio.get(
-    '/api/Notes/$studentId',
+    'http://$backendUrl/api/Notes/$studentId',
     options: Options(headers: {'Authorization': 'Bearer $token'}),
   );
 

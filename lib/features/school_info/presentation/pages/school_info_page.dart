@@ -6,7 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Main page that displays school information with expandable sections
 /// This follows the Flutter provider pattern you're using in your codebase
-final Color iconColor =const Color.fromARGB(255, 14, 99, 168);
+final Color iconColor = const Color.fromARGB(255, 14, 99, 168);
+
 class SchoolInfoPage extends ConsumerWidget {
   const SchoolInfoPage({Key? key}) : super(key: key);
 
@@ -81,17 +82,16 @@ class SchoolInfoContent extends StatelessWidget {
         children: [
           // School logo - you can replace this with an actual image
           Container(
-            width: 160,
-            height: 160,
-            margin: EdgeInsets.all(8),
-            child: Center(
-              child: Icon(
-                Icons.school_outlined,
-                size: 160,
-                color: iconColor
-              ),
-            ),
-          ),
+              width: 160,
+              height: 160,
+              margin: EdgeInsets.all(8),
+              child: Center(
+                child: Hero(
+                  tag: 'schoolP',
+                  child:
+                      Icon(Icons.school_outlined, size: 160, color: iconColor),
+                ),
+              )),
 
           // Main school information card
           _buildMainInfoCard(),
@@ -243,28 +243,28 @@ class SchoolInfoContent extends StatelessWidget {
 
   /// Builds the payment information content for the expandable section
   Widget _buildPaymentContent() {
-  return Column(
-    children: [
-      _buildContactRow(
-        'Mode de paiement',
-        schoolInfo.paymentInfo.paymentMode.isNotEmpty
-            ? schoolInfo.paymentInfo.paymentMode
-            : 'Non spécifié',
-      ),
-      _buildContactRow(
-        'RIP du compte',
-        schoolInfo.paymentInfo.accountRip.isNotEmpty
-            ? schoolInfo.paymentInfo.accountRip
-            : 'Non spécifié',
-      ),
-    ],
-  );
-}
+    return Column(
+      children: [
+        _buildContactRow(
+          'Mode de paiement',
+          schoolInfo.paymentInfo.paymentMode.isNotEmpty
+              ? schoolInfo.paymentInfo.paymentMode
+              : 'Non spécifié',
+        ),
+        _buildContactRow(
+          'RIP du compte',
+          schoolInfo.paymentInfo.accountRip.isNotEmpty
+              ? schoolInfo.paymentInfo.accountRip
+              : 'Non spécifié',
+        ),
+      ],
+    );
+  }
 
   /// Helper method to build contact/payment information rows
   Widget _buildContactRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4,horizontal: 0),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

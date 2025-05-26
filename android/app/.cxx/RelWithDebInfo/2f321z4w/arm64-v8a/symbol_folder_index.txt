@@ -1,0 +1,1 @@
+/media/ilyes/extraMint/projects/dirassati/build/app/intermediates/cxx/RelWithDebInfo/2f321z4w/obj/arm64-v8a

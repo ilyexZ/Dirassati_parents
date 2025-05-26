@@ -1,13 +1,16 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:dirassati/features/absences/presentation/pages/absences_page.dart';
+import 'package:dirassati/features/acceuil/data/models/student_model.dart';
 import 'package:dirassati/features/acceuil/presentation/pages/notes_page.dart';
+import 'package:dirassati/features/payments/presentation/pages/payment_details_page.dart';
 import 'package:dirassati/features/time_table/presentation/pages/time_table_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class ActivitesWidget extends StatelessWidget {
-  const ActivitesWidget({super.key});
+  final Student student;
+  const ActivitesWidget({super.key,required this.student});
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +55,16 @@ class ActivitesWidget extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const AbsencesPage()),
                 );
               },
-              child: _buildActivityRow(Icons.check_circle_outline, "Présence")),
+              child: _buildActivityRow(Icons.check_circle_outline, "Abscences")),
           Divider(),
+          GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) =>  PaymentDetailsPage(studentId : student.studentId)),
+                );
+              },
+              child: _buildActivityRow(Icons.check_circle_outline, "Paiments")),
           
           
         ],
