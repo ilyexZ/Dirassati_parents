@@ -1,5 +1,3 @@
-// ./lib/features/payments/domain/providers/payments_provider.dart
-
 import 'package:dirassati/core/core_providers.dart';
 import 'package:dirassati/features/payments/data/datasources/payments_remote_data_source.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -73,32 +71,44 @@ class PaymentSubmissionState {
   final PaymentSubmissionStatus status;
   final String? errorMessage;
   final bool isSubmitting;
+  final String? checkoutUrl;
+  final String? checkoutId;
 
   PaymentSubmissionState({
     required this.status,
     this.errorMessage,
     required this.isSubmitting,
+    this.checkoutUrl,
+    this.checkoutId,
   });
 
   PaymentSubmissionState.idle() : 
     status = PaymentSubmissionStatus.idle,
     errorMessage = null,
-    isSubmitting = false;
+    isSubmitting = false,
+    checkoutUrl = null,
+    checkoutId = null;
 
   PaymentSubmissionState.loading() : 
     status = PaymentSubmissionStatus.loading,
     errorMessage = null,
-    isSubmitting = true;
+    isSubmitting = true,
+    checkoutUrl = null,
+    checkoutId = null;
 
-  PaymentSubmissionState.success() : 
+  PaymentSubmissionState.success({String? checkoutUrl, String? checkoutId}) : 
     status = PaymentSubmissionStatus.success,
     errorMessage = null,
-    isSubmitting = false;
+    isSubmitting = false,
+    checkoutUrl = checkoutUrl,
+    checkoutId = checkoutId;
 
   PaymentSubmissionState.error(String message) : 
     status = PaymentSubmissionStatus.error,
     errorMessage = message,
-    isSubmitting = false;
+    isSubmitting = false,
+    checkoutUrl = null,
+    checkoutId = null;
 }
 
 /// State notifier for handling payment submissions
@@ -107,7 +117,25 @@ class PaymentSubmissionNotifier extends StateNotifier<PaymentSubmissionState> {
   
   PaymentSubmissionNotifier(this._repository) : super(PaymentSubmissionState.idle());
 
-  /// Submit a new payment with the provided details
+  /// Set loading state
+  void setLoading() {
+    state = PaymentSubmissionState.loading();
+  }
+
+  /// Set success state with checkout details
+  void setSuccess({String? checkoutUrl, String? checkoutId}) {
+    state = PaymentSubmissionState.success(
+      checkoutUrl: checkoutUrl,
+      checkoutId: checkoutId,
+    );
+  }
+
+  /// Set error state
+  void setError(String message) {
+    state = PaymentSubmissionState.error(message);
+  }
+
+  /// Submit a new payment with the provided details (legacy method)
   Future<void> submitPayment({
     required String studentId,
     required String billId,
@@ -180,3 +208,143 @@ final paymentDateFormatterProvider = Provider<String Function(DateTime)>((ref) {
     return '$day $month $year - $hour:$minute $period';
   };
 });
+/// Provider for refreshing payment data
+final paymentRefreshProvider = Provider<PaymentRefreshController>((ref) {
+  return PaymentRefreshController(ref);
+});
+
+/// Controller class for handling payment refresh operations
+class PaymentRefreshController {
+  final Ref _ref;
+  
+  PaymentRefreshController(this._ref);
+
+  /// Refresh payment bills for a specific student
+  Future<void> refreshPaymentBills(String studentId) async {
+    print('🔄 Refreshing payment bills for student: $studentId');
+    
+    // Invalidate the specific student's payment bills
+    _ref.invalidate(paymentBillsProvider(studentId));
+    
+    // Wait a moment for the provider to refresh
+    await Future.delayed(const Duration(milliseconds: 100));
+  }
+
+  /// Refresh payment bills for the currently selected student
+  Future<void> refreshCurrentStudentPaymentBills() async {
+    final selectedStudentId = _ref.read(selectedStudentIdProvider);
+    
+    if (selectedStudentId != null) {
+      print('🔄 Refreshing payment bills for currently selected student: $selectedStudentId');
+      await refreshPaymentBills(selectedStudentId);
+    } else {
+      print('⚠️ No student selected for refresh');
+    }
+  }
+
+  /// Refresh all payment-related data
+  Future<void> refreshAllPaymentData() async {
+    print('🔄 Refreshing all payment data');
+    
+    // Reset payment submission state
+    _ref.read(paymentSubmissionProvider.notifier).resetState();
+    
+    // Refresh currently selected student's data
+    await refreshCurrentStudentPaymentBills();
+  }
+
+  /// Force refresh payment bills (ignores cache completely)
+  Future<void> forceRefreshPaymentBills(String studentId) async {
+    print('🔄 Force refreshing payment bills for student: $studentId');
+    
+    // Invalidate and refresh
+    _ref.invalidate(paymentBillsProvider(studentId));
+    
+    // Also refresh the repository and data source
+    _ref.invalidate(paymentsRepositoryProvider);
+    _ref.invalidate(paymentsRemoteDataSourceProvider);
+    
+    await Future.delayed(const Duration(milliseconds: 200));
+  }
+}
+
+/// State provider for tracking refresh status
+final paymentRefreshStateProvider = StateProvider<PaymentRefreshState>((ref) {
+  return PaymentRefreshState.idle();
+});
+
+/// Refresh state management
+class PaymentRefreshState {
+  final bool isRefreshing;
+  final DateTime? lastRefreshTime;
+  final String? error;
+
+  PaymentRefreshState({
+    required this.isRefreshing,
+    this.lastRefreshTime,
+    this.error,
+  });
+
+  PaymentRefreshState.idle()
+      : isRefreshing = false,
+        lastRefreshTime = null,
+        error = null;
+
+  PaymentRefreshState.refreshing()
+      : isRefreshing = true,
+        lastRefreshTime = null,
+        error = null;
+
+  PaymentRefreshState.completed()
+      : isRefreshing = false,
+        lastRefreshTime = DateTime.now(),
+        error = null;
+
+  PaymentRefreshState.error(String errorMessage)
+      : isRefreshing = false,
+        lastRefreshTime = null,
+        error = errorMessage;
+}
+
+/// Enhanced refresh controller with state management
+final paymentRefreshControllerProvider = StateNotifierProvider<PaymentRefreshStateNotifier, PaymentRefreshState>((ref) {
+  return PaymentRefreshStateNotifier(ref);
+});
+
+class PaymentRefreshStateNotifier extends StateNotifier<PaymentRefreshState> {
+  final Ref _ref;
+  
+  PaymentRefreshStateNotifier(this._ref) : super(PaymentRefreshState.idle());
+
+  /// Refresh with state management
+  Future<void> refreshWithState(String studentId) async {
+    if (state.isRefreshing) {
+      print('⚠️ Refresh already in progress, skipping...');
+      return;
+    }
+
+    state = PaymentRefreshState.refreshing();
+    
+    try {
+      print('🔄 Starting refresh for student: $studentId');
+      
+      // Invalidate the payment bills provider
+      _ref.invalidate(paymentBillsProvider(studentId));
+      
+      // Wait for refresh to complete
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      state = PaymentRefreshState.completed();
+      print('✅ Refresh completed successfully');
+      
+    } catch (e) {
+      print('❌ Refresh failed: $e');
+      state = PaymentRefreshState.error(e.toString());
+    }
+  }
+
+  /// Reset refresh state
+  void resetState() {
+    state = PaymentRefreshState.idle();
+  }
+}

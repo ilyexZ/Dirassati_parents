@@ -59,6 +59,7 @@ class ActivitesWidget extends StatelessWidget {
           Divider(),
           GestureDetector(
               onTap: () {
+                
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) =>  PaymentDetailsPage(studentId : student.studentId)),

@@ -1,6 +1,7 @@
 // lib/features/notifications/domain/providers/notification_provider.dart
 import 'package:dirassati/core/services/notification_service.dart';
 import 'package:dirassati/core/services/signalr_service.dart';
+import 'package:dirassati/features/payments/domain/providers/payments_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
@@ -111,68 +112,146 @@ class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
       },
     );
 
-    // Register handler for bill notifications
+    // Register handler for new student bill notifications
     _signalRService.registerClientMethod(
-      'ReceivePendingBillNotification',
-      (args) async {
-        debugPrint('🔥 BILL NOTIFICATION RECEIVED!');
-        debugPrint('📩 Args content: $args');
-        
-        if (args != null && args.isNotEmpty) {
-          try {
-            final notificationData = args[0];
-            if (notificationData is List) {
-              // Handle multiple bills
-              for (var bill in notificationData) {
-                if (bill is Map<String, dynamic>) {
-                  final formattedNotification = _formatBillNotification(bill);
-                  state = [formattedNotification, ...state];
-                  await _showLocalBillNotification(formattedNotification);
-                }
-              }
-            } else if (notificationData is Map<String, dynamic>) {
-              // Handle single bill
-              final formattedNotification = _formatBillNotification(notificationData);
-              state = [formattedNotification, ...state];
-              await _showLocalBillNotification(formattedNotification);
-            }
-            debugPrint('✅ Successfully processed bill notification(s)');
-          } catch (e) {
-            debugPrint('❌ Error processing bill notification: $e');
-          }
-        }
-      },
-    );_signalRService.registerClientMethod(
       'ReceiveNewStudentBill',
       (args) async {
-        debugPrint('🔥 NEW BILL NOTIFICATION RECEIVED!');
+        debugPrint('🔥 NEW STUDENT BILL NOTIFICATION RECEIVED!');
         debugPrint('📩 Args content: $args');
         
         if (args != null && args.isNotEmpty) {
           try {
             final notificationData = args[0];
-            if (notificationData is List) {
-              // Handle multiple bills
-              for (var bill in notificationData) {
-                if (bill is Map<String, dynamic>) {
-                  final formattedNotification = _formatNewBillNotification(bill);
-                  state = [formattedNotification, ...state];
-                  await _showLocalNewBillNotification(formattedNotification);
-                }
-              }
-            } else if (notificationData is Map<String, dynamic>) {
-              // Handle single bill
-              final formattedNotification = _formatBillNotification(notificationData);
-              state = [formattedNotification, ...state];
-              await _showLocalBillNotification(formattedNotification);
+            Map<String, String> formattedNotification;
+            
+            if (notificationData is Map<String, dynamic>) {
+              formattedNotification = _formatNewBillNotification(notificationData);
+            } else if (notificationData is String) {
+              final Map<String, dynamic> jsonData = json.decode(notificationData);
+              formattedNotification = _formatNewBillNotification(jsonData);
+            } else {
+              debugPrint('❌ Unknown bill data type: ${notificationData.runtimeType}');
+              return;
             }
-            debugPrint('✅ Successfully processed bill notification(s)');
+            
+            state = [formattedNotification, ...state];
+            await _showLocalNewBillNotification(formattedNotification);
+            debugPrint('✅ Successfully processed new student bill notification');
           } catch (e) {
-            debugPrint('❌ Error processing bill notification: $e');
+            debugPrint('❌ Error processing new student bill notification: $e');
           }
         }
       },
     );
+
+    // Register handler for pending bill notifications (multiple bills)
+    _signalRService.registerClientMethod(
+      'ReceivePendingBillNotification',
+      (args) async {
+        debugPrint('🔥 PENDING BILL NOTIFICATION RECEIVED!');
+        debugPrint('📩 Args content: $args');
+        
+        if (args != null && args.isNotEmpty) {
+          try {
+            final notificationData = args[0];
+            if (notificationData is List) {
+              // Handle multiple bills
+              for (var bill in notificationData) {
+                if (bill is Map<String, dynamic>) {
+                  final formattedNotification = _formatPendingBillNotification(bill);
+                  state = [formattedNotification, ...state];
+                  await _showLocalPendingBillNotification(formattedNotification);
+                }
+              }
+            } else if (notificationData is Map<String, dynamic>) {
+              // Handle single bill
+              final formattedNotification = _formatPendingBillNotification(notificationData);
+              state = [formattedNotification, ...state];
+              await _showLocalPendingBillNotification(formattedNotification);
+            }
+            debugPrint('✅ Successfully processed pending bill notification(s)');
+          } catch (e) {
+            debugPrint('❌ Error processing pending bill notification: $e');
+          }
+        }
+      },
+    );
+
+    // Register handler for payment bill success notifications
+    _signalRService.registerClientMethod(
+    'ReceivePaymentBillSuccess',
+    (args) async {
+      debugPrint('🔥 PAYMENT BILL SUCCESS NOTIFICATION RECEIVED!');
+      debugPrint('📩 Args content: $args');
+      
+      if (args != null && args.isNotEmpty) {
+        try {
+          final notificationData = args[0];
+          Map<String, String> formattedNotification;
+          
+          if (notificationData is Map<String, dynamic>) {
+            formattedNotification = _formatPaymentBillSuccessNotification(notificationData);
+            // Extract student ID from the notification data
+            final studentId = notificationData['StudentId']?.toString();
+            _triggerPaymentRefresh(studentId);
+          } else if (notificationData is String) {
+            final Map<String, dynamic> jsonData = json.decode(notificationData);
+            formattedNotification = _formatPaymentBillSuccessNotification(jsonData);
+            // Extract student ID from the JSON data
+            final studentId = jsonData['StudentId']?.toString();
+            _triggerPaymentRefresh(studentId);
+          } else {
+            debugPrint('❌ Unknown payment success data type: ${notificationData.runtimeType}');
+            return;
+          }
+          
+          state = [formattedNotification, ...state];
+          await _showLocalPaymentSuccessNotification(formattedNotification);
+          debugPrint('✅ Successfully processed payment success notification');
+        } catch (e) {
+          debugPrint('❌ Error processing payment success notification: $e');
+        }
+      }
+    },
+  );
+
+    // Register handler for payment bill update notifications
+    _signalRService.registerClientMethod(
+    'ReceivePaymentBillUpdate',
+    (args) async {
+      debugPrint('🔥 PAYMENT BILL UPDATE NOTIFICATION RECEIVED!');
+      debugPrint('📩 Args content: $args');
+      
+      if (args != null && args.isNotEmpty) {
+        try {
+          final notificationData = args[0];
+          Map<String, String> formattedNotification;
+          
+          if (notificationData is Map<String, dynamic>) {
+            formattedNotification = _formatPaymentBillUpdateNotification(notificationData);
+            // Extract student ID from the notification data
+            final studentId = notificationData['StudentId']?.toString();
+            _triggerPaymentRefresh(studentId);
+          } else if (notificationData is String) {
+            final Map<String, dynamic> jsonData = json.decode(notificationData);
+            formattedNotification = _formatPaymentBillUpdateNotification(jsonData);
+            // Extract student ID from the JSON data
+            final studentId = jsonData['StudentId']?.toString();
+            _triggerPaymentRefresh(studentId);
+          } else {
+            debugPrint('❌ Unknown payment update data type: ${notificationData.runtimeType}');
+            return;
+          }
+          
+          state = [formattedNotification, ...state];
+          await _showLocalPaymentUpdateNotification(formattedNotification);
+          debugPrint('✅ Successfully processed payment update notification');
+        } catch (e) {
+          debugPrint('❌ Error processing payment update notification: $e');
+        }
+      }
+    },
+  );
 
     // Register handler for broadcast notifications
     _signalRService.registerClientMethod(
@@ -223,7 +302,8 @@ class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
     }
   }
 
-  // Your existing formatting methods remain the same...
+  // FORMATTING METHODS FOR ALL NOTIFICATION TYPES
+
   Map<String, String> _formatAbsenceNotificationFromHub(Map<String, dynamic> data) {
     final formattedDate = data['date'] != null 
         ? _formatDate(DateTime.parse(data['date'])) 
@@ -259,19 +339,72 @@ class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
     };
   }
 
-  Map<String, String> _formatBillNotification(Map<String, dynamic> data) {
+  Map<String, String> _formatNewBillNotification(Map<String, dynamic> data) {
     final formattedDate = _formatDate(DateTime.now());
-    final amount = data['amount']?.toString() ?? '0';
+    final amount = data['Amount']?.toString() ?? '0';
     
     return {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'type': 'bill',
-      'title': data['title']?.toString() ?? 'Nouvelle facture',
+      'type': 'new_bill',
+      'title': data['Title']?.toString() ?? 'Nouvelle facture',
       'subtitle': 'facture école',
       'child': 'Montant: $amount',
-      'description': data['description']?.toString() ?? 'Une nouvelle facture a été ajoutée.',
+      'description': data['Description']?.toString() ?? 'Une nouvelle facture a été ajoutée.',
       'date': formattedDate,
       'remark': '',
+    };
+  }
+
+  Map<String, String> _formatPendingBillNotification(Map<String, dynamic> data) {
+    final formattedDate = _formatDate(DateTime.now());
+    final amount = data['Amount']?.toString() ?? '0';
+    
+    return {
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'type': 'pending_bill',
+      'title': data['Title']?.toString() ?? 'Facture en attente',
+      'subtitle': 'facture en attente',
+      'child': 'Montant: $amount',
+      'description': data['Description']?.toString() ?? 'Vous avez une facture en attente de paiement.',
+      'date': formattedDate,
+      'remark': '',
+    };
+  }
+
+  Map<String, String> _formatPaymentBillSuccessNotification(Map<String, dynamic> data) {
+    final formattedDate = data['CreatedAt'] != null 
+        ? _formatDate(DateTime.parse(data['CreatedAt'])) 
+        : _formatDate(DateTime.now());
+    final amount = data['Amount']?.toString() ?? '0';
+    
+    return {
+      'id': data['BillId']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      'type': 'payment_success',
+      'title': 'Paiement réussi',
+      'subtitle': 'paiement confirmé',
+      'child': 'Montant: $amount',
+      'description': 'Votre paiement pour "${data['Title'] ?? 'facture'}" a été traité avec succès.',
+      'date': formattedDate,
+      'remark': data['PaymentStatus']?.toString() ?? '',
+    };
+  }
+
+  Map<String, String> _formatPaymentBillUpdateNotification(Map<String, dynamic> data) {
+    final formattedDate = data['CreatedAt'] != null 
+        ? _formatDate(DateTime.parse(data['CreatedAt'])) 
+        : _formatDate(DateTime.now());
+    final amount = data['Amount']?.toString() ?? '0';
+    final status = data['PaymentStatus']?.toString() ?? 'Unknown';
+    
+    return {
+      'id': data['BillId']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      'type': 'payment_update',
+      'title': 'Mise à jour de paiement',
+      'subtitle': 'statut de paiement',
+      'child': 'Montant: $amount',
+      'description': 'Le statut de votre paiement pour "${data['Title'] ?? 'facture'}" a été mis à jour: $status',
+      'date': formattedDate,
+      'remark': status,
     };
   }
 
@@ -299,23 +432,9 @@ class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
       return '${dateTime.day}/${dateTime.month}/${dateTime.year} - ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
     }
   }
-  Map<String, String> _formatNewBillNotification(Map<String, dynamic> data) {
-    final formattedDate = _formatDate(DateTime.now());
-    final amount = data['Amount']?.toString() ?? '0';
-    
-    return {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'type': 'bill',
-      'title': data['Title']?.toString() ?? 'Nouvelle facture',
-      'subtitle': 'facture école',
-      'child': 'Montant: $amount',
-      'description': data['Description']?.toString() ?? 'Une nouvelle facture a été ajoutée.',
-      'date': formattedDate,
-      'remark': '',
-    };
-  }
 
-  // Your existing notification methods remain the same...
+  // LOCAL NOTIFICATION METHODS FOR ALL TYPES
+
   Future<void> _showLocalAbsenceNotificationFromHub(Map<String, String> data) async {
     try {
       await _notificationService.showAbsenceNotification(
@@ -343,32 +462,63 @@ class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
     }
   }
 
-  Future<void> _showLocalBillNotification(Map<String, String> data) async {
+  Future<void> _showLocalNewBillNotification(Map<String, String> data) async {
     try {
       await _notificationService.showGeneralNotification(
         title: data['title'] ?? 'Nouvelle facture',
         body: data['description'] ?? 'Une nouvelle facture a été ajoutée',
         payload: data['id'],
-        channelId: 'bill_channel_id',
-        channelName: 'Bill Notifications',
-        channelDescription: 'Notifications for school bills',
+        channelId: 'new_bill_channel_id',
+        channelName: 'New Bill Notifications',
+        channelDescription: 'Notifications for new school bills',
       );
     } catch (e) {
-      debugPrint('❌ Error showing local bill notification: $e');
+      debugPrint('❌ Error showing local new bill notification: $e');
     }
   }
-  Future<void> _showLocalNewBillNotification(Map<String, String> data) async {
+
+  Future<void> _showLocalPendingBillNotification(Map<String, String> data) async {
     try {
       await _notificationService.showGeneralNotification(
-        title: data['Title'] ?? 'Nouvelle facture',
-        body: data['Description'] ?? 'Une nouvelle facture a été ajoutée',
-        payload: data['BillId'],
-        channelId: 'bill_channel_id',
-        channelName: 'Bill Notifications',
-        channelDescription: 'Notifications for school bills',
+        title: data['title'] ?? 'Facture en attente',
+        body: data['description'] ?? 'Vous avez une facture en attente',
+        payload: data['id'],
+        channelId: 'pending_bill_channel_id',
+        channelName: 'Pending Bill Notifications',
+        channelDescription: 'Notifications for pending school bills',
       );
     } catch (e) {
-      debugPrint('❌ Error showing local bill notification: $e');
+      debugPrint('❌ Error showing local pending bill notification: $e');
+    }
+  }
+
+  Future<void> _showLocalPaymentSuccessNotification(Map<String, String> data) async {
+    try {
+      await _notificationService.showGeneralNotification(
+        title: data['title'] ?? 'Paiement réussi',
+        body: data['description'] ?? 'Votre paiement a été traité avec succès',
+        payload: data['id'],
+        channelId: 'payment_success_channel_id',
+        channelName: 'Payment Success Notifications',
+        channelDescription: 'Notifications for successful payments',
+      );
+    } catch (e) {
+      debugPrint('❌ Error showing local payment success notification: $e');
+    }
+  }
+
+  Future<void> _showLocalPaymentUpdateNotification(Map<String, String> data) async {
+    try {
+      await _notificationService.showGeneralNotification(
+        title: data['title'] ?? 'Mise à jour de paiement',
+        body: data['description'] ?? 'Le statut de votre paiement a été mis à jour',
+        payload: data['id'],
+        channelId: 'payment_update_channel_id',
+        channelName: 'Payment Update Notifications',
+        channelDescription: 'Notifications for payment status updates',
+      );
+    } catch (e) {
+      debugPrint('❌ Error showing local payment update notification: $e');
     }
   }
 
@@ -383,6 +533,8 @@ class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
       debugPrint('❌ Error showing local general notification: $e');
     }
   }
+
+  // UTILITY METHODS
 
   // Method to disconnect from SignalR
   Future<void> disconnect() async {
@@ -432,5 +584,16 @@ class NotificationNotifier extends StateNotifier<List<Map<String, String>>> {
   void dispose() {
     disconnect();
     super.dispose();
+  }
+  void _triggerPaymentRefresh(String? studentId) {
+    if (studentId != null) {
+      try {
+        // Invalidate the payment provider for this student
+        _ref.invalidate(paymentBillsProvider(studentId));
+        debugPrint('🔄 Payment data refreshed for student: $studentId');
+      } catch (e) {
+        debugPrint('❌ Error refreshing payment data: $e');
+      }
+    }
   }
 }
