@@ -65,37 +65,37 @@ class StudentCard extends StatelessWidget {
                     // Notification Icon with badge
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Placeholder(),
-                          ),
-                        );
+                      //   Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (context) => const Placeholder(),
+                      //     ),
+                      //   );
                       },
                       child: Stack(
                         children: [
                           const Icon(Icons.notifications_outlined, size: 30),
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            child: Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                "3",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 7,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
+                          // Positioned(
+                          //   right: 0,
+                          //   top: 0,
+                          //   child: Container(
+                          //     width: 12,
+                          //     height: 12,
+                          //     decoration: BoxDecoration(
+                          //       color: Colors.red,
+                          //       borderRadius: BorderRadius.circular(8),
+                          //     ),
+                          //     alignment: Alignment.center,
+                          //     child: const Text(
+                          //       "3",
+                          //       style: TextStyle(
+                          //         color: Colors.white,
+                          //         fontSize: 7,
+                          //         fontWeight: FontWeight.bold,
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),

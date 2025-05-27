@@ -94,8 +94,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
                         : null),
                 labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                 tabs: [
+                  Tab(text:'Notifications'),
                   Tab(text:'Convocations'),
-                  Tab(text:'Absences'),
                 ],
               ),
               const Divider(height: 1, thickness: 1, color: Colors.grey),
@@ -110,10 +110,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage>
               controller: _tabController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                // Static convocations
-                NotificationList(data: convocationsData),
                 // Dynamic absences
                 NotificationList(data: absenceItems),
+                // Static convocations
+                NotificationList(data: convocationsData),
               ],
             ),
           ),

@@ -1,9 +1,9 @@
 // lib/features/school_info/data/datasources/school_info_remote_data_source.dart
 import 'package:dio/dio.dart';
+import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dirassati/features/school_info/domain/models/school_info_model.dart';
 import 'package:dirassati/features/school_info/domain/providers/school_info_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 
 class SchoolInfoRemoteDataSource {
   final Dio dio;
@@ -21,26 +21,55 @@ class SchoolInfoRemoteDataSource {
   /// In a real app, this would make an HTTP request to your backend
   Future<SchoolInfo> fetchSchoolInfo(String studentId) async {
     final token = await storage.read(key: 'auth_token');
+    print(token);
 
     // Debug mode - return static data for testing
     if (token == debugToken || token == null) {
+      clog("g", "ITs debug token");
       return _getDebugSchoolInfo();
     }
 
     try {
       // Real API call would go here
       final response = await dio.get(
-        'http://$backendUrl/api/students/$studentId/school',
+        'https://$backendUrl/api/students/$studentId/school',
         options: Options(
           headers: {'Authorization': 'Bearer $token'},
         ),
       );
 
       // Parse the response and convert to SchoolInfo object
-      final Map<String, dynamic> data = response.data;
-      return SchoolInfo.fromJson(data);
+      final data = response.data as Map<String, dynamic>;
+
+// flatten the address object to one line:
+      final addr = data['address'] as Map<String, dynamic>? ?? {};
+      final addressStr = [
+        addr['street'],
+        addr['city'],
+        addr['state'],
+        addr['postalCode'],
+        addr['country'],
+      ].where((s) => s != null && (s as String).isNotEmpty).join(', ');
+
+      return SchoolInfo(
+        name: data['name'] as String? ?? '',
+        director: data['director'] as String? ?? 'Not specifeid',
+        address: addressStr,
+        phoneNumber: data['phoneNumber'] as String? ?? '',
+        siteWeb: data['websiteUrl'] as String? ?? '',
+        contactInfo: ContactInfo(
+          phone1: data['phoneNumber'] as String? ?? '',
+          phone2: '',
+          phone3: '',
+          email: data['email'] as String? ?? '',
+        ),
+        paymentInfo: PaymentInfo(
+          paymentMode: data['bankCode'] as String? ?? '',
+          accountRip: (data['billAmount'] ?? '').toString(),
+        ),
+      );
     } catch (e) {
-      print("ERROR FETCHING SCHOOLL INFO!!!!");
+      print("ERROR FETCHING SCHOOLL INFO!!!!$e");
       // If the API call fails, return debug data for now
       // In production, you'd want to handle this error properly
       return _getDebugSchoolInfo();
