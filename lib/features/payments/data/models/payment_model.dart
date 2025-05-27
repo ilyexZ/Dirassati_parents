@@ -1,49 +1,40 @@
+// ./lib/features/payments/data/models/payment_model.dart
 class PaymentDetails {
-  final String studentName;
-  final String studentLevel; // e.g., "3 ème année moyenne - m2"
-  final String studentImageUrl;
-  final double amountToPay;
-  final double amountDeposited;
-  final String paymentDeadline;
-  final String studentId;
+  final String billId;
+  final String title;
+  final String description;
+  final double amount;
+  final String paymentStatus;
+  final DateTime createdAt;
 
   PaymentDetails({
-    required this.studentName,
-    required this.studentLevel,
-    required this.studentImageUrl,
-    required this.amountToPay,
-    required this.amountDeposited,
-    required this.paymentDeadline,
-    required this.studentId,
+    required this.billId,
+    required this.title,
+    required this.description,
+    required this.amount,
+    required this.paymentStatus,
+    required this.createdAt,
   });
-
-  // Calculate remaining amount to pay
-  double get remainingAmount => amountToPay - amountDeposited;
-
-  // Check if payment is complete
-  bool get isPaymentComplete => remainingAmount <= 0;
 
   factory PaymentDetails.fromJson(Map<String, dynamic> json) {
     return PaymentDetails(
-      studentName: json['studentName'] ?? '',
-      studentLevel: json['studentLevel'] ?? '',
-      studentImageUrl: json['studentImageUrl'] ?? '',
-      amountToPay: (json['amountToPay'] ?? 0).toDouble(),
-      amountDeposited: (json['amountDeposited'] ?? 0).toDouble(),
-      paymentDeadline: json['paymentDeadline'] ?? '',
-      studentId: json['studentId'] ?? '',
+      billId: json['billId'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      amount: (json['amount'] ?? 0).toDouble(),
+      paymentStatus: json['paymentStatus'] ?? '',
+      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'studentName': studentName,
-      'studentLevel': studentLevel,
-      'studentImageUrl': studentImageUrl,
-      'amountToPay': amountToPay,
-      'amountDeposited': amountDeposited,
-      'paymentDeadline': paymentDeadline,
-      'studentId': studentId,
+      'billId': billId,
+      'title': title,
+      'description': description,
+      'amount': amount,
+      'paymentStatus': paymentStatus,
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 }
@@ -81,33 +72,6 @@ class WireTransfer {
       'expeditionDate': expeditionDate,
       'amount': amount,
       'transferId': transferId,
-    };
-  }
-}
-
-// Complete payment information model
-class PaymentInfo {
-  final PaymentDetails paymentDetails;
-  final List<WireTransfer> wireTransfers;
-
-  PaymentInfo({
-    required this.paymentDetails,
-    required this.wireTransfers,
-  });
-
-  factory PaymentInfo.fromJson(Map<String, dynamic> json) {
-    return PaymentInfo(
-      paymentDetails: PaymentDetails.fromJson(json['paymentDetails'] ?? {}),
-      wireTransfers: (json['wireTransfers'] as List<dynamic>?)
-          ?.map((transfer) => WireTransfer.fromJson(transfer))
-          .toList() ?? [],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'paymentDetails': paymentDetails.toJson(),
-      'wireTransfers': wireTransfers.map((transfer) => transfer.toJson()).toList(),
     };
   }
 }

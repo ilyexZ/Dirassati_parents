@@ -1,15 +1,14 @@
+// ./lib/features/payments/presentation/pages/payment_details_page.dart
+
+import 'package:dirassati/features/payments/data/models/payment_model.dart';
 import 'package:dirassati/features/payments/domain/providers/payments_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/payments_provider.dart';
-import '../widgets/payment_header_widget.dart';
-import '../widgets/payment_details_card.dart';
-import '../widgets/wire_transfers_list.dart';
+import '../widgets/payment_bill_card.dart';
 import '../widgets/payment_action_button.dart';
 
-/// Payment Details Page - Main screen for displaying student payment information
-/// This page follows your existing architectural patterns and integrates seamlessly
-/// with your Riverpod state management approach throughout the app
+/// Payment Details Page - Main screen for displaying student payment bills
 class PaymentDetailsPage extends ConsumerWidget {
   final String studentId;
 
@@ -20,16 +19,14 @@ class PaymentDetailsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch the payment info provider for reactive updates
-    // This will automatically rebuild when data changes or updates
-    final paymentInfoAsync = ref.watch(paymentInfoProvider(studentId));
+    // Watch the payment bills provider for reactive updates
+    final paymentBillsAsync = ref.watch(paymentBillsProvider(studentId));
 
     // Watch currency formatter for consistent number formatting
     final formatCurrency = ref.watch(currencyFormatterProvider);
 
     return Scaffold(
-      backgroundColor:
-          const Color(0xFFF8FAFC), // Light background matching your design
+      backgroundColor: const Color(0xFFF8FAFC), // Light background matching your design
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -47,7 +44,7 @@ class PaymentDetailsPage extends ConsumerWidget {
         ),
         centerTitle: false,
       ),
-      body: paymentInfoAsync.when(
+      body: paymentBillsAsync.when(
         // Loading state - show centered progress indicator
         loading: () => const Center(
           child: CircularProgressIndicator(
@@ -71,9 +68,7 @@ class PaymentDetailsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  isNotFound
-                      ? 'Aucun paiement trouvé'
-                      : 'Erreur lors du chargement',
+                  isNotFound ? 'Aucun paiement trouvé' : 'Erreur lors du chargement',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -82,10 +77,7 @@ class PaymentDetailsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  //isNotFound ?
-                       'Aucun paiement trouvé pour cet étudiant.'
-                      // : 'Impossible de charger les informations de paiement : $error'
-                      ,
+                  'Aucun paiement trouvé pour cet étudiant.',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade600,
@@ -94,7 +86,7 @@ class PaymentDetailsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () => ref.refresh(paymentInfoProvider(studentId)),
+                  onPressed: () => ref.refresh(paymentBillsProvider(studentId)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6366F1),
                     foregroundColor: Colors.white,
@@ -109,59 +101,96 @@ class PaymentDetailsPage extends ConsumerWidget {
           );
         },
 
-        // Success state - display the payment information
-        data: (paymentInfo) => CustomScrollView(
-          slivers: [
-            // Student header section with avatar and basic info
-            SliverToBoxAdapter(
-              child: PaymentHeaderWidget(
-                paymentDetails: paymentInfo.paymentDetails,
+        // Success state - display the payment bills
+        data: (paymentBills) {
+          if (paymentBills.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.receipt_long_outlined,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Aucune facture',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Aucune facture de paiement trouvée.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
               ),
-            ),
+            );
+          }
 
-            // Payment details card showing amounts and deadline
-            SliverToBoxAdapter(
-              child: PaymentDetailsCard(
-                paymentDetails: paymentInfo.paymentDetails,
-                formatCurrency: formatCurrency,
+          return CustomScrollView(
+            slivers: [
+              // Header section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Factures de paiement',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${paymentBills.length} facture(s) trouvée(s)',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
 
-            // Wire transfers list showing payment history
-            // SliverToBoxAdapter(
-            //   child: WireTransfersList(
-            //     wireTransfers: paymentInfo.wireTransfers,
-            //     formatCurrency: formatCurrency,
-            //   ),
-            // ),
+              // Payment bills list
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final bill = paymentBills[index];
+                    return PaymentBillCard(
+                      paymentDetails: bill,
+                      formatCurrency: formatCurrency,
+                      onPayPressed: () {},//TODO CHARGILI,
+                    );
+                  },
+                  childCount: paymentBills.length,
+                ),
+              ),
 
-            // Add some bottom padding before the floating action button
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100),
-            ),
-          ],
-        ),
-      ),
-
-      // Floating action button for making payments
-      // This follows Material Design guidelines and your app's styling
-      floatingActionButton: PaymentActionButton(
-        studentId: studentId,
-        onPaymentSuccess: () {
-          // Refresh payment data after successful payment
-          ref.refresh(paymentInfoProvider(studentId));
-
-          // Show success message to user
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Paiement effectué avec succès!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
-            ),
+              // Add some bottom padding
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 100),
+              ),
+            ],
           );
         },
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
+
+  /// Show payment form dialog for a specific bill
+  
 }

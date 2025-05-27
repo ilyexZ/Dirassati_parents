@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/payments_provider.dart';
-import '../dialogs/payment_form_dialog.dart';
 
 /// Payment action button widget
 /// This is the floating action button that triggers the payment process
@@ -25,7 +24,7 @@ class PaymentActionButton extends ConsumerWidget {
       child: ElevatedButton(
         onPressed: submissionState.isSubmitting 
             ? null 
-            : () => _showPaymentDialog(context, ref),
+            : () {},
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF6366F1),
           foregroundColor: Colors.white,
@@ -56,13 +55,5 @@ class PaymentActionButton extends ConsumerWidget {
   }
 
   /// Show payment form dialog
-  void _showPaymentDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => PaymentFormDialog(
-        studentId: studentId,
-        onSuccess: onPaymentSuccess,
-      ),
-    );
-  }
+  
 }

@@ -1,4 +1,4 @@
-// ./features/payments/domain/providers/payments_provider.dart
+// ./lib/features/payments/domain/providers/payments_provider.dart
 
 import 'package:dirassati/core/core_providers.dart';
 import 'package:dirassati/features/payments/data/datasources/payments_remote_data_source.dart';
@@ -19,8 +19,8 @@ final paymentsRepositoryProvider = Provider<PaymentsRepository>((ref) {
   return PaymentsRepository(remoteDataSource);
 });
 
-/// Main provider to fetch complete payment information for a specific student
-final paymentInfoProvider = FutureProvider.family<PaymentInfo, String>((ref, studentId) async {
+/// Main provider to fetch payment bills for a specific student
+final paymentBillsProvider = FutureProvider.family<List<PaymentDetails>, String>((ref, studentId) async {
   final repository = ref.watch(paymentsRepositoryProvider);
   final storage = ref.watch(secureStorageProvider);
   
@@ -31,60 +31,39 @@ final paymentInfoProvider = FutureProvider.family<PaymentInfo, String>((ref, stu
   if (token == PaymentsRemoteDataSource.debugToken) {
     print('🐛 Debug: Using static debug data for student: $studentId');
     // Return static debug data directly
-    return PaymentInfo(
-      paymentDetails: PaymentDetails(
-        studentName: "Imad mohammed",
-        studentLevel: "3 ème année moyenne - m2",
-        studentImageUrl: "https://via.placeholder.com/60",
-        amountToPay: 220000.0,
-        amountDeposited: 200000.0,
-        paymentDeadline: "06-06-2025",
-        studentId: studentId,
+    return [
+      PaymentDetails(
+        billId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        title: "Frais de scolarité - Semestre 1",
+        description: "Paiement des frais de scolarité pour le premier semestre",
+        amount: 25000,
+        paymentStatus: "Pending",
+        createdAt: DateTime.now().subtract(const Duration(days: 10)),
       ),
-      wireTransfers: [
-        WireTransfer(
-          senderRip: "121212121212121221",
-          receiverRip: "121212121212121221",
-          expeditionDate: "25 Janvier 2025 - 9:12 Am",
-          amount: 120000.0,
-          transferId: "transfer_1",
-        ),
-        WireTransfer(
-          senderRip: "121212121212121221",
-          receiverRip: "121212121212121221",
-          expeditionDate: "20 Janvier 2025 - 14:30 Pm",
-          amount: 80000.0,
-          transferId: "transfer_2",
-        ),
-      ],
-    );
+      PaymentDetails(
+        billId: "4fb85f64-5717-4562-b3fc-2c963f66afa7",
+        title: "Frais d'inscription",
+        description: "Frais d'inscription annuelle",
+        amount: 15000,
+        paymentStatus: "Paid",
+        createdAt: DateTime.now().subtract(const Duration(days: 30)),
+      ),
+    ];
   }
   
   print('🌐 Debug: Using normal API call for student: $studentId');
   // Normal API call flow
-  return repository.getPaymentInfo(studentId);
-});
-
-/// Provider to fetch only payment details (without wire transfers)
-final paymentDetailsProvider = FutureProvider.family<PaymentDetails, String>((ref, studentId) async {
-  final paymentInfo = await ref.watch(paymentInfoProvider(studentId).future);
-  return paymentInfo.paymentDetails;
-});
-
-/// Provider to fetch only wire transfer history for a student
-final wireTransfersProvider = FutureProvider.family<List<WireTransfer>, String>((ref, studentId) async {
-  final paymentInfo = await ref.watch(paymentInfoProvider(studentId).future);
-  return paymentInfo.wireTransfers;
+  return repository.getPaymentBills(studentId);
 });
 
 /// State provider for tracking the currently selected student
 final selectedStudentIdProvider = StateProvider<String?>((ref) => null);
 
-/// Provider that combines selected student with payment info
-final currentStudentPaymentProvider = Provider<AsyncValue<PaymentInfo>?>((ref) {
+/// Provider that combines selected student with payment bills
+final currentStudentPaymentBillsProvider = Provider<AsyncValue<List<PaymentDetails>>?>((ref) {
   final selectedStudentId = ref.watch(selectedStudentIdProvider);
   if (selectedStudentId == null) return null;
-  return ref.watch(paymentInfoProvider(selectedStudentId));
+  return ref.watch(paymentBillsProvider(selectedStudentId));
 });
 
 /// States for payment submission process
@@ -131,6 +110,7 @@ class PaymentSubmissionNotifier extends StateNotifier<PaymentSubmissionState> {
   /// Submit a new payment with the provided details
   Future<void> submitPayment({
     required String studentId,
+    required String billId,
     required String senderRip,
     required double amount,
     required String expeditionDate,
@@ -140,6 +120,7 @@ class PaymentSubmissionNotifier extends StateNotifier<PaymentSubmissionState> {
     try {
       final success = await _repository.submitPayment(
         studentId: studentId,
+        billId: billId,
         senderRip: senderRip,
         amount: amount,
         expeditionDate: expeditionDate,

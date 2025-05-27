@@ -30,27 +30,7 @@ class PaymentHeaderWidget extends StatelessWidget {
       child: Row(
         children: [
           // Student avatar with placeholder handling
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFF6366F1).withOpacity(0.1),
-            ),
-            child: paymentDetails.studentImageUrl.isNotEmpty
-                ? ClipOval(
-                    child: Image.network(
-                      paymentDetails.studentImageUrl,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildAvatarFallback();
-                      },
-                    ),
-                  )
-                : _buildAvatarFallback(),
-          ),
+         
           
           const SizedBox(width: 16),
           
@@ -60,7 +40,7 @@ class PaymentHeaderWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  paymentDetails.studentName,
+                  paymentDetails.paymentStatus,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -69,7 +49,7 @@ class PaymentHeaderWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  paymentDetails.studentLevel,
+                  paymentDetails.createdAt.toString(),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade600,
@@ -86,7 +66,7 @@ class PaymentHeaderWidget extends StatelessWidget {
   /// Fallback avatar widget when image is not available
   /// Shows student initials in a colored circle
   Widget _buildAvatarFallback() {
-    final initials = _getStudentInitials(paymentDetails.studentName);
+    final initials = _getStudentInitials("s");
     return Container(
       width: 60,
       height: 60,
@@ -110,13 +90,6 @@ class PaymentHeaderWidget extends StatelessWidget {
   /// Extract initials from student name for avatar fallback
   /// This handles various name formats gracefully
   String _getStudentInitials(String name) {
-    if (name.isEmpty) return 'S';
-    
-    final parts = name.trim().split(' ');
-    if (parts.length == 1) {
-      return parts[0].substring(0, 1).toUpperCase();
-    } else {
-      return '${parts[0].substring(0, 1)}${parts[1].substring(0, 1)}'.toUpperCase();
-    }
-  }
+   return 'S';
+   }
 }
