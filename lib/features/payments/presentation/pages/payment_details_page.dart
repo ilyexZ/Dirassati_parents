@@ -1,6 +1,3 @@
-// Example of how to use the updated PaymentActionButton in your payment details page
-
-import 'package:dirassati/features/payments/data/models/payment_model.dart';
 import 'package:dirassati/features/payments/domain/providers/payments_provider.dart';
 import 'package:dirassati/features/payments/presentation/widgets/payment_action_button.dart';
 import 'package:flutter/material.dart';

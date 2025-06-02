@@ -24,7 +24,7 @@ class InformationsGeneralesWidget extends StatelessWidget {
           const SizedBox(height: 8),
           _buildRow("Année", student.grade ?? "#empty#"),
           Divider(),
-          _buildRow("Classe", student.classe ?? "##empty##"),
+          _buildRow("Classe", student.classe ?? "Class A3"),
           Divider(),
           _buildRow("N° Ref", student.studentId),
           Divider(),

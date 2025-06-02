@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class ProfileHeader extends StatelessWidget {
   final Profile profile;
   const ProfileHeader({super.key, required this.profile});
-  static final tempImage = AssetImage("assets/img/pfp.png");
+  static final tempImage = AssetImage("assets/img/parent2.png");
 
   @override
   Widget build(BuildContext context) {

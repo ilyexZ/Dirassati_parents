@@ -1,6 +1,4 @@
 import 'package:dirassati/core/auth_info_provider.dart';
-import 'package:dirassati/core/core_providers.dart';
-import 'package:dirassati/core/services/notification_service.dart';
 import 'package:dirassati/core/widgets/backend_ip_settings_screen.dart';
 import 'package:dirassati/features/acceuil/domain/providers/students_provider.dart';
 import 'package:dirassati/features/profile/presentation/providers/profile_providers.dart';

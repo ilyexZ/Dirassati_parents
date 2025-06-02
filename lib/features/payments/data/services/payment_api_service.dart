@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -59,7 +58,7 @@ class PaymentApiService {
   /// Initiates a payment for the given student ID
   /// Returns PaymentInitiationResponse with checkout URL and ID
   static Future<PaymentInitiationResponse> initiatePayment(String studentId) async {
-    print('🚀 PaymentApiService: Starting payment initiation for student: $studentId');
+    //print('🚀 PaymentApiService: Starting payment initiation for student: $studentId');
     
     // Read the token inside the method
     final token = await storage.read(key: 'auth_token');

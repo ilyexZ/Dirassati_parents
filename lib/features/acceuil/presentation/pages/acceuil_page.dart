@@ -1,11 +1,7 @@
-import 'package:community_material_icon/community_material_icon.dart';
+
 import 'package:dirassati/core/auth_info_provider.dart';
-import 'package:dirassati/core/services/colorLog.dart';
 import 'package:dirassati/core/widgets/shimmer_student_card.dart';
-import 'package:dirassati/features/auth/domain/providers/auth_provider.dart';
-import 'package:dirassati/features/auth/presentation/pages/auth_wrapper.dart';
 import 'package:dirassati/features/profile/presentation/providers/profile_providers.dart';
-import 'package:dirassati/features/school_info/domain/models/school_info_model.dart';
 import 'package:dirassati/features/school_info/presentation/pages/school_info_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

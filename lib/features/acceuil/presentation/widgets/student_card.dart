@@ -11,7 +11,7 @@ class StudentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+      margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 16),
       clipBehavior: Clip.none,
       elevation: 5,
       color: Colors.white,
@@ -42,7 +42,7 @@ class StudentCard extends StatelessWidget {
                       tag: 'student-${student.studentId}', // Unique tag
                       child: CircleAvatar(
                         radius: 28,
-                        backgroundImage: AssetImage("assets/img/pfp.png"),
+                        backgroundImage: student.firstName.startsWith("f")? AssetImage("assets/img/childf"):AssetImage("assets/img/childm2"),
                         backgroundColor: Colors.transparent,
                       ),
                     ),

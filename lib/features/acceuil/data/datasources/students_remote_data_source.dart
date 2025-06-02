@@ -75,18 +75,18 @@ class StudentsRemoteDataSource {
   List<Student> _getStaticStudents() {
     return [
       Student(
-        studentId: "debug-1",
-        firstName: "Debug",
-        lastName: "Student One",
-        enrollmentDate: "2025-01-01",
-        grade: "1st Grade",
+        studentId: "9435-1862-6479-4163",
+        firstName: "hatem",
+        lastName: "Mohammed",
+        enrollmentDate: "2024-01-02",
+        grade: "2nd Grade",
         isActive: true,
       ),
       Student(
-        studentId: "debug-2",
-        firstName: "Debug",
-        lastName: "Student Two",
-        enrollmentDate: "2025-01-02",
+        studentId: "3419-7436-1456-3251",
+        firstName: "fatima",
+        lastName: "Mohammed",
+        enrollmentDate: "2024-01-02",
         grade: "2nd Grade",
         isActive: true,
       ),

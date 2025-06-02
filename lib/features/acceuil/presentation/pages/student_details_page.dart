@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 class StudentDetailsPage extends StatelessWidget {
   final Student student;
 
-  static final tempImage = AssetImage("assets/img/pfp.png");
+  static final tempImage = AssetImage("assets/img/childm2");
   const StudentDetailsPage({super.key, required this.student});
 
   @override

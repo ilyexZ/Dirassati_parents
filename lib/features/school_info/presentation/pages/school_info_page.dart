@@ -89,7 +89,7 @@ class SchoolInfoContent extends StatelessWidget {
                 child: Hero(
                   tag: 'schoolP',
                   child:
-                      SizedBox(height: 160, width: 160, child: Image.asset("assets/img/logo.png")),
+                      SizedBox(height: 160, width: 160, child: Image.asset("assets/img/sc.png")),
                 ),
               )),
 

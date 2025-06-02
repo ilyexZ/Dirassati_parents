@@ -155,10 +155,11 @@ class PaymentActionButton extends ConsumerWidget {
           print('❌ Failed to launch URL even though canLaunchUrl returned true');
           throw Exception('Failed to launch checkout URL');
         }
-      } else {
-        print('❌ Cannot launch URL: $checkoutUrl');
-        throw Exception('Cannot launch checkout URL');
       }
+      //  else {
+      //   print('❌ Cannot launch URL: $checkoutUrl');
+      //   throw Exception('Cannot launch checkout URL');
+      // }
     } catch (e) {
       print('❌ Failed to launch checkout URL: $e');
       if (context.mounted) {

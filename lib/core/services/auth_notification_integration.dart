@@ -1,5 +1,3 @@
-// lib/core/services/auth_notification_integration.dart
-import 'package:dirassati/features/payments/domain/providers/payments_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dirassati/features/notifications/domain/providers/notification_provider.dart';

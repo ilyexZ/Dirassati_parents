@@ -26,13 +26,13 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return Profile(
         parentId: "1f0fd9ac-d8bb-4089-b952-7f482ebc41da",
         occupation: "Teacher",
-        firstName: "JaneDebug",
-        lastName: "DoeDebug",
-        birthDate: "31/12/9999",
-        userName: "parent@example.com",
+        firstName: "Ishaq",
+        lastName: "Mohammed",
+        birthDate: "31/12/1990",
+        userName: "MIshaq",
         email: "parent@example.com",
         emailConfirmed: true,
-        phoneNumber: "555-123-4567",
+        phoneNumber: "+213-6-12-34-56-87",
         phoneNumberConfirmed: false,
         relationshipName: "",
       );

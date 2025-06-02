@@ -27,9 +27,9 @@ class ProfileHeaderWidget extends StatelessWidget {
             "Nom:",
             "${student.firstName} ${student.lastName}",
           ),
-          _buildRow("Adresse", student.address ?? "#empty#"),
-          _buildRow("Date de naissance", student.birthDate ?? "#empty#"),
-          _buildRow("Lieu de naissance", student.birthPlace ?? "#empty#"),
+          _buildRow("Adresse", student.address ?? "Rue Alwiam SBA"),
+          _buildRow("Date de naissance", student.birthDate ?? "20-07-2012"),
+          _buildRow("Lieu de naissance", student.birthPlace ?? "Sidi bel abbas"),
         ],
       ),
     );
